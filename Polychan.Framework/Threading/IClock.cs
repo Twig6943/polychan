@@ -1,7 +1,7 @@
 ﻿// Stolen from:
 // https://github.com/ppy/osu-framework/blob/master/osu.Framework/Timing/IClock.cs#L9
 
-namespace Polychan.GUI.Framework.Threading
+namespace Polychan.Framework.Threading
 {
     /// <summary>
     /// A basic clock for keeping time.

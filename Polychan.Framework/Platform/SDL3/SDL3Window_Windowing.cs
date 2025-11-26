@@ -2,7 +2,7 @@
 using SDL;
 using static SDL.SDL3;
 
-namespace Polychan.GUI.Framework.Platform.SDL3
+namespace Polychan.Framework.Platform.SDL3
 {
     internal partial class SDL3Window
     {

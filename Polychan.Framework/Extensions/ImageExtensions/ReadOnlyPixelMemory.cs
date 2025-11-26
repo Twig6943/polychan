@@ -3,7 +3,7 @@ using SixLabors.ImageSharp;
 using System.Buffers;
 using System.Diagnostics;
 
-namespace Polychan.GUI.Framework.Extensions.ImageExtensions;
+namespace Polychan.Framework.Extensions.ImageExtensions;
 
 public struct ReadOnlyPixelMemory<TPixel> : IDisposable
         where TPixel : unmanaged, IPixel<TPixel>

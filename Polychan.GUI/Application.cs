@@ -6,9 +6,9 @@ using SixLabors.ImageSharp.Formats.Png;
 using Polychan.GUI.Styles;
 using Polychan.GUI.Widgets;
 using Polychan.GUI.Styles.Phantom;
-using Polychan.GUI.Framework.Platform;
-using Polychan.GUI.Framework.Platform.SDL3;
-using Polychan.GUI.Framework.Platform.Skia;
+using Polychan.Framework.Platform;
+using Polychan.Framework.Platform.SDL3;
+using Polychan.Framework.Platform.Skia;
 
 namespace Polychan.GUI;
 

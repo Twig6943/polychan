@@ -1,5 +1,5 @@
-﻿using Polychan.GUI.Framework.Platform;
-using Polychan.GUI.Framework.Platform.Skia;
+﻿using Polychan.Framework.Platform;
+using Polychan.Framework.Platform.Skia;
 using Polychan.GUI.Input;
 using Polychan.GUI.Layouts;
 using SDL;

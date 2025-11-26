@@ -3,7 +3,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace Polychan.GUI.Framework.Utils;
+namespace Polychan.Framework.Utils;
 
 /// <summary>
 /// Wrapper on <see cref="GCHandle" /> that supports the <see cref="IDisposable" /> pattern.

@@ -1,4 +1,4 @@
-﻿using Polychan.GUI.Framework.Platform.Skia;
+﻿using Polychan.Framework.Platform.Skia;
 using SDL;
 using SkiaSharp;
 

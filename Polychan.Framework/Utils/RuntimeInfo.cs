@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace Polychan.GUI.Framework.Utils;
+namespace Polychan.Framework.Utils;
 
 public static class RuntimeInfo
 {

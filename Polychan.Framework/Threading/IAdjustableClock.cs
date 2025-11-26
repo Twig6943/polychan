@@ -1,4 +1,4 @@
-﻿namespace Polychan.GUI.Framework.Threading
+﻿namespace Polychan.Framework.Threading
 {
     /// <summary>
     /// A clock that can be started, stopped, reset etc.

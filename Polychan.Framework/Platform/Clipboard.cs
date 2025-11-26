@@ -1,7 +1,7 @@
 ﻿using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp;
 
-namespace Polychan.GUI.Framework.Platform
+namespace Polychan.Framework.Platform
 {
     /// <summary>
     /// This class allows placing and retrieving data from the clipboard

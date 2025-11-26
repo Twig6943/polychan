@@ -1,4 +1,4 @@
-﻿namespace Polychan.GUI.Framework.Extensions
+﻿namespace Polychan.Framework.Extensions
 {
     /// <summary>
     /// This class holds extension methods for various purposes and should not be used explicitly, ever.

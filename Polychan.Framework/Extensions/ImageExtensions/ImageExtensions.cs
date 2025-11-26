@@ -3,7 +3,7 @@ using SixLabors.ImageSharp;
 using System.Buffers;
 using SixLabors.ImageSharp.Advanced;
 
-namespace Polychan.GUI.Framework.Extensions.ImageExtensions;
+namespace Polychan.Framework.Extensions.ImageExtensions;
 
 public static class ImageExtensions
 {

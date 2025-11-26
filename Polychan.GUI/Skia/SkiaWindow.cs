@@ -3,13 +3,14 @@ using SkiaSharp;
 using System.Diagnostics;
 using System.Drawing;
 using Polychan.Framework;
-using Polychan.GUI.Framework.Platform.SDL3;
-using Polychan.GUI.Framework.Platform.Windows;
-using Polychan.GUI.Framework.Utils;
+using Polychan.GUI;
+using Polychan.Framework.Platform.SDL3;
+using Polychan.Framework.Platform.Windows;
+using Polychan.Framework.Utils;
 using Polychan.GUI.Widgets;
 using static SDL.SDL3;
 
-namespace Polychan.GUI.Framework.Platform.Skia;
+namespace Polychan.Framework.Platform.Skia;
 
 internal unsafe class SkiaWindow
 {

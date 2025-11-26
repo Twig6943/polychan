@@ -1,15 +1,15 @@
-﻿using Polychan.GUI.Framework.Extensions.ImageExtensions;
+﻿using Polychan.Framework.Extensions.ImageExtensions;
 using SDL;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using Polychan.GUI.Framework.Platform.Windows;
-using Polychan.GUI.Framework.Threading;
-using Polychan.GUI.Framework.Utils;
+using Polychan.Framework.Platform.Windows;
+using Polychan.Framework.Threading;
+using Polychan.Framework.Utils;
 using static SDL.SDL3;
 
-namespace Polychan.GUI.Framework.Platform.SDL3
+namespace Polychan.Framework.Platform.SDL3
 {
     internal abstract unsafe partial class SDL3Window : IWindow
     {

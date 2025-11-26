@@ -1,4 +1,4 @@
-﻿namespace Polychan.GUI.Framework.Threading
+﻿namespace Polychan.Framework.Threading
 {
     internal class ScheduledDelegateWithData<T> : ScheduledDelegate
     {

@@ -1,10 +1,10 @@
 ﻿using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using Polychan.GUI.Framework.Platform.SDL3;
-using Polychan.GUI.Framework.Platform.Windows.Native;
+using Polychan.Framework.Platform.SDL3;
+using Polychan.Framework.Platform.Windows.Native;
 
-namespace Polychan.GUI.Framework.Platform.Windows
+namespace Polychan.Framework.Platform.Windows
 {
     [SupportedOSPlatform("windows")]
     internal class SDL3WindowsWindow : SDL3Window

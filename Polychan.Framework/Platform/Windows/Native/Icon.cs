@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-namespace Polychan.GUI.Framework.Platform.Windows.Native;
+namespace Polychan.Framework.Platform.Windows.Native;
 
 [SupportedOSPlatform("windows")]
 internal class Icon : IDisposable

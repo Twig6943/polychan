@@ -1,4 +1,4 @@
-﻿namespace Polychan.GUI.Framework.Platform;
+﻿namespace Polychan.Framework.Platform;
 
 /// <summary>
 /// Enumerates the available window states in the operating system.

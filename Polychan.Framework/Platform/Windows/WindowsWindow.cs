@@ -3,7 +3,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using Polychan.GUI.Input;
 
-namespace Polychan.GUI.Framework.Platform.Windows;
+namespace Polychan.Framework.Platform.Windows;
 
 internal class WindowsWindow : IWindow
 {

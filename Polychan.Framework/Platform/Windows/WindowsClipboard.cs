@@ -3,7 +3,7 @@ using SixLabors.ImageSharp;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Polychan.GUI.Framework.Platform.Windows
+namespace Polychan.Framework.Platform.Windows
 {
     public class WindowsClipboard : Clipboard
     {

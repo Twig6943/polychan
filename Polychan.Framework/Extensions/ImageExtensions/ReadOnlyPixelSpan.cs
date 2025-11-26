@@ -2,7 +2,7 @@
 using SixLabors.ImageSharp;
 using System.Buffers;
 
-namespace Polychan.GUI.Framework.Extensions.ImageExtensions;
+namespace Polychan.Framework.Extensions.ImageExtensions;
 
 public readonly ref struct ReadOnlyPixelSpan<TPixel>
         where TPixel : unmanaged, IPixel<TPixel>

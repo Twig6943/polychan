@@ -1,4 +1,4 @@
-﻿using Polychan.GUI.Framework.Platform;
+﻿using Polychan.Framework.Platform;
 
 namespace Polychan.GUI.Widgets;
 

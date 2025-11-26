@@ -1,9 +1,9 @@
 ﻿using SDL;
 using System.Diagnostics;
-using Polychan.GUI.Framework.Utils;
-using Polychan.GUI.Framework.Platform;
-using Polychan.GUI.Framework.Platform.SDL3;
-using Polychan.GUI.Framework.Platform.Windows;
+using Polychan.Framework.Utils;
+using Polychan.Framework.Platform;
+using Polychan.Framework.Platform.SDL3;
+using Polychan.Framework.Platform.Windows;
 
 namespace Polychan.Framework;
 

@@ -5,10 +5,10 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using Polychan.GUI.Framework.Utils;
+using Polychan.Framework.Utils;
 using static SDL.SDL3;
 
-namespace Polychan.GUI.Framework.Platform.SDL3
+namespace Polychan.Framework.Platform.SDL3
 {
     public class SDL3Clipboard : Clipboard
     {

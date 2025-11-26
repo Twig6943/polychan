@@ -2,7 +2,7 @@
 using System.Numerics;
 using Polychan.GUI.Input;
 
-namespace Polychan.GUI.Framework.Platform
+namespace Polychan.Framework.Platform
 {
     [Flags]
     public enum WindowFlags

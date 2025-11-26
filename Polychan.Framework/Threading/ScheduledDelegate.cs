@@ -3,7 +3,7 @@
 
 using System.Diagnostics;
 
-namespace Polychan.GUI.Framework.Threading
+namespace Polychan.Framework.Threading
 {
     public class ScheduledDelegate : IComparable<ScheduledDelegate>
     {

@@ -1,10 +1,10 @@
 ﻿// Stolen from:
 // https://github.com/ppy/osu-framework/blob/master/osu.Framework/Threading/ScheduledDelegate.cs
 
-using Polychan.GUI.Framework.Extensions;
+using Polychan.Framework.Extensions;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Polychan.GUI.Framework.Threading
+namespace Polychan.Framework.Threading
 {
     /// <summary>
     /// Marshals delegates to run from the Scheduler's base thread in a threadsafe manner
