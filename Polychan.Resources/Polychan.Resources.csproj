@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <Title>Polychan Resources</Title>
+    <Product>Polychan Resources</Product>
+    <Company>Boxsubmus</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <EmbeddedResource Include="Fonts\**\*" />
+	  <EmbeddedResource Include="Images\**\*" />
+  </ItemGroup>
+  
+</Project>
