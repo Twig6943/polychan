@@ -15,16 +15,16 @@ public static class Config
     /// <summary>
     /// 
     /// </summary>
-    public const bool SHARE_GL_CONTEXTS = false;
+    public const bool ShareGlContexts = false;
     
     /// <summary>
     /// When popups are created, they make native OS windows to handle them.
     /// This also creates separate GL contexts.
     /// </summary>
-    public const bool POPUPS_MAKE_WINDOWS = false;
+    public const bool PopupsMakeWindows = false;
 
     /// <summary>
     /// 
     /// </summary>
-    public const bool SUPPORT_PAINT_CACHING = false;
+    public const bool SupportPaintCaching = false;
 }

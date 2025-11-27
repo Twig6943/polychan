@@ -1,41 +1,37 @@
 ﻿using SDL;
 using SkiaSharp;
-using System.Diagnostics;
 using System.Drawing;
-using Polychan.Framework;
 using Polychan.GUI;
-using Polychan.Framework.Platform.SDL3;
-using Polychan.Framework.Platform.Windows;
-using Polychan.Framework.Utils;
 using Polychan.GUI.Widgets;
 using static SDL.SDL3;
+#pragma warning disable CS0162 // Unreachable code detected
 
 namespace Polychan.Framework.Platform.Skia;
 
 internal unsafe class SkiaWindow
 {
-    internal Widget ParentWidget { get; private set; }
+    internal readonly Widget ParentWidget;
     internal readonly SkiaWindow? ParentWindow;
 
-    internal OSWindow WindowHolder { get; private set; }
+    internal OSWindow WindowHolder { get; }
 
-    internal SDL_Window* SDLWindowHandle => WindowHolder.SDLWindowHandle;
-    internal SDL_WindowID SDLWindowID => WindowHolder.SDLWindowID;
+    private SDL_Window* SdlWindowHandle => WindowHolder.SDLWindowHandle;
+    internal SDL_WindowID SdlWindowId => WindowHolder.SDLWindowID;
 
     #region Hardware Acceleration
 
-    internal SDL_GLContextState* SDLGLContext { get; private set; }
-    internal GRGlInterface? InterfaceGL { get; private set; }
-    internal GRContext? GRContext { get; private set; }
+    private SDL_GLContextState* SDLGLContext { get; }
+    private GRGlInterface? InterfaceGL { get; }
+    internal GRContext? GRContext { get; }
     internal GRBackendRenderTarget? RenderTarget { get; private set; }
 
     #endregion
 
     #region Software Rendering
 
-    internal SDL_Renderer* SDLRenderer { get; private set; }
-    internal SDL_Texture* SDLTexture { get; private set; }
-    internal SDL_Surface* SDLSurface { get; private set; }
+    internal SDL_Renderer* SdlRenderer { get; }
+    internal SDL_Texture* SdlTexture { get; private set; }
+    internal SDL_Surface* SdlSurface { get; private set; }
 
     internal SKImageInfo ImageInfo { get; private set; }
 
@@ -73,9 +69,9 @@ internal unsafe class SkiaWindow
 
         if (Config.HardwareAccel)
         {
-            if (Config.SHARE_GL_CONTEXTS)
+            if (Config.ShareGlContexts)
             {
-                SDLGLContext = SDL_GL_CreateContext(SDLWindowHandle);
+                SDLGLContext = SDL_GL_CreateContext(SdlWindowHandle);
 
                 if (!m_createdBaseGLContext)
                 {
@@ -89,7 +85,7 @@ internal unsafe class SkiaWindow
             }
             else
             {
-                SDLGLContext = SDL_GL_CreateContext(SDLWindowHandle);
+                SDLGLContext = SDL_GL_CreateContext(SdlWindowHandle);
                 // SDL_GL_MakeCurrent(SDLWindowHandle, SDLGLContext);
 
                 InterfaceGL = GRGlInterface.Create();
@@ -98,7 +94,7 @@ internal unsafe class SkiaWindow
         }
         else
         {
-            SDLRenderer = SDL_CreateRenderer(SDLWindowHandle, (byte*)null);
+            SdlRenderer = SDL_CreateRenderer(SdlWindowHandle, (byte*)null);
         }
 
         WindowRegistry.Register(this);
@@ -120,23 +116,23 @@ internal unsafe class SkiaWindow
         }
         else
         {
-            if (SDLTexture != null)
+            if (SdlTexture != null)
             {
-                SDL_DestroyTexture(SDLTexture);
+                SDL_DestroyTexture(SdlTexture);
             }
 
             // Create SDL texture as the drawing target
-            SDLTexture = SDL_CreateTexture(SDLRenderer,
+            SdlTexture = SDL_CreateTexture(SdlRenderer,
                 SDL_PixelFormat.SDL_PIXELFORMAT_ARGB8888,
                 SDL_TextureAccess.SDL_TEXTUREACCESS_STREAMING,
                 w, h);
 
-            if (SDLSurface != null)
+            if (SdlSurface != null)
             {
-                SDL_DestroySurface(SDLSurface);
+                SDL_DestroySurface(SdlSurface);
             }
             // SDLSurface = SDL_CreateSurface(w, h, SDL_GetPixelFormatForMasks(32, 0, 0, 0, 0));
-            SDLSurface = SDL_CreateSurface(w, h, SDL_PixelFormat.SDL_PIXELFORMAT_ARGB8888);
+            SdlSurface = SDL_CreateSurface(w, h, SDL_PixelFormat.SDL_PIXELFORMAT_ARGB8888);
         }
     }
 
@@ -144,27 +140,27 @@ internal unsafe class SkiaWindow
     {
         WindowRegistry.Remove(this);
 
-        if (!Config.SHARE_GL_CONTEXTS)
+        if (!Config.ShareGlContexts)
         {
             GRContext?.Dispose();
             InterfaceGL?.Dispose();
         }
 
-        if (SDLSurface != null)
+        if (SdlSurface != null)
         {
-            SDL_DestroySurface(SDLSurface);
+            SDL_DestroySurface(SdlSurface);
         }
-        if (SDLTexture != null)
+        if (SdlTexture != null)
         {
-            SDL_DestroyTexture(SDLTexture);
+            SDL_DestroyTexture(SdlTexture);
         }
         if (SDLGLContext != null)
         {
             SDL_GL_DestroyContext(SDLGLContext);
         }
-        if (SDLRenderer != null)
+        if (SdlRenderer != null)
         {
-            SDL_DestroyRenderer(SDLRenderer);
+            SDL_DestroyRenderer(SdlRenderer);
         }
 
         WindowHolder.Dispose();
@@ -174,7 +170,7 @@ internal unsafe class SkiaWindow
     {
         if (Config.HardwareAccel)
         {
-            SDL_GL_MakeCurrent(SDLWindowHandle, SDLGLContext);
+            SDL_GL_MakeCurrent(SdlWindowHandle, SDLGLContext);
         }
     }
 
@@ -182,12 +178,12 @@ internal unsafe class SkiaWindow
     {
         if (Config.HardwareAccel)
         {
-            SDL_GL_SwapWindow(SDLWindowHandle);
+            SDL_GL_SwapWindow(SdlWindowHandle);
         }
         else
         {
-            SDL_RenderTexture(SDLRenderer, SDLTexture, null, null);
-            SDL_RenderPresent(SDLRenderer);
+            SDL_RenderTexture(SdlRenderer, SdlTexture, null, null);
+            SDL_RenderPresent(SdlRenderer);
             // SDL_RenderPresent(popupRenderer);
         }
     }
@@ -208,7 +204,8 @@ internal unsafe class SkiaWindow
     public void Center()
     {
         // Get the window's current display index
-        var displayIndex = SDL_GetDisplayForWindow(SDLWindowHandle);
+        var displayIndex = SDL_GetDisplayForWindow(SdlWindowHandle);
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
         if (displayIndex < 0)
         {
             throw new InvalidOperationException($"Failed to get window display index: {SDL_GetError()}");
@@ -223,7 +220,7 @@ internal unsafe class SkiaWindow
 
         // Get the window size
         int windowWidth, windowHeight;
-        SDL_GetWindowSize(SDLWindowHandle, &windowWidth, &windowHeight);
+        SDL_GetWindowSize(SdlWindowHandle, &windowWidth, &windowHeight);
 
         // Calculate the centered position
         int centeredX = displayBounds.x + (displayBounds.w - windowWidth) / 2;

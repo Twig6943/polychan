@@ -11,12 +11,12 @@ public class WindowWidget : Widget
     /// </summary>
     public string Title
     {
-        get => m_nativeWindow?.WindowHolder.Window.Title ?? string.Empty;
+        get => NativeWindow?.WindowHolder.Window.Title ?? string.Empty;
         set
         {
-            if (m_nativeWindow != null)
+            if (NativeWindow != null)
             {
-                m_nativeWindow.WindowHolder.Window.Title = value;
+                NativeWindow.WindowHolder.Window.Title = value;
             }
         }
     }

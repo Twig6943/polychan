@@ -312,7 +312,7 @@ public partial class Widget : IDisposable
     private unsafe SDL_Texture* m_cachedRenderTexture;
 
     // If top-level, owns a native window
-    internal SkiaWindow? m_nativeWindow;
+    internal SkiaWindow? NativeWindow { get; private set; }
 
     private bool m_isDirty = false;
     private bool m_hasDirtyDescendants = false;
@@ -324,7 +324,7 @@ public partial class Widget : IDisposable
     {
         get
         {
-            return m_shouldCache && Config.SUPPORT_PAINT_CACHING && !Config.HardwareAccel;
+            return m_shouldCache && Config.SupportPaintCaching && !Config.HardwareAccel;
         }
         set
         {
@@ -337,7 +337,7 @@ public partial class Widget : IDisposable
     #region Windowing
 
     internal bool IsTopLevel => Parent == null && IsWindow;
-    internal bool IsWindow => m_windowType == WindowType.Window || m_windowType == WindowType.Tool || m_windowType == WindowType.Dialog || (m_windowType == WindowType.Popup && Config.POPUPS_MAKE_WINDOWS);
+    internal bool IsWindow => m_windowType == WindowType.Window || m_windowType == WindowType.Tool || m_windowType == WindowType.Dialog || (m_windowType == WindowType.Popup && Config.PopupsMakeWindows);
 
     /// <summary>
     /// Difference between this and <see cref="Visible"/> is this also checks if this is just a normal widget.
@@ -400,23 +400,23 @@ public partial class Widget : IDisposable
             s_openPopupMenu = this;
         }
 
-        if (m_nativeWindow != null)
+        if (NativeWindow != null)
         {
-            m_nativeWindow.WindowHolder.Window.Size = new System.Drawing.Size(m_width, m_height);
-            m_nativeWindow.CreateFrameBuffer(m_width, m_height);
+            NativeWindow.WindowHolder.Window.Size = new System.Drawing.Size(m_width, m_height);
+            NativeWindow.CreateFrameBuffer(m_width, m_height);
 
-            m_nativeWindow.WindowHolder.Window.Position = new System.Drawing.Point(X, Y);
+            NativeWindow.WindowHolder.Window.Position = new System.Drawing.Point(X, Y);
             if (m_windowType != WindowType.Popup)
             {
                 // @HACK
-                m_nativeWindow.Center();
+                NativeWindow.Center();
             }
-            if (m_nativeWindow.ParentWindow != null)
+            if (NativeWindow.ParentWindow != null)
             {
                 // Inherit the parent window's icon by default
-                m_nativeWindow.WindowHolder.Window.CopyIconFromWindow(m_nativeWindow.ParentWindow.WindowHolder.Window);
+                NativeWindow.WindowHolder.Window.CopyIconFromWindow(NativeWindow.ParentWindow.WindowHolder.Window);
             }
-            m_nativeWindow.WindowHolder.Window.Show();
+            NativeWindow.WindowHolder.Window.Show();
         }
 
         TriggerRepaint();
@@ -432,7 +432,7 @@ public partial class Widget : IDisposable
     public void Hide()
     {
         m_visible = false;
-        m_nativeWindow?.WindowHolder.Window.Hide();
+        NativeWindow?.WindowHolder.Window.Hide();
 
         if (s_openPopupMenu == this)
         {
@@ -484,8 +484,8 @@ public partial class Widget : IDisposable
         m_x = x;
         m_y = y;
 
-        if (m_nativeWindow != null)
-            m_nativeWindow.WindowHolder.Window.Position = new System.Drawing.Point(m_x, m_y);
+        if (NativeWindow != null)
+            NativeWindow.WindowHolder.Window.Position = new System.Drawing.Point(m_x, m_y);
     }
 
     public void SetRect(int x, int y, int width, int height)
@@ -517,9 +517,9 @@ public partial class Widget : IDisposable
 
         // This is fine because a native window can only exist on top level widgets and thus,
         // can't be in a layout!
-        if (m_nativeWindow != null)
+        if (NativeWindow != null)
         {
-            m_nativeWindow.WindowHolder.Window.Size = new System.Drawing.Size(m_width, m_height);
+            NativeWindow.WindowHolder.Window.Size = new System.Drawing.Size(m_width, m_height);
         }
 
         dispatchResize();
@@ -573,7 +573,7 @@ public partial class Widget : IDisposable
         m_parent = null;
 
         m_cachedSurface?.Dispose();
-        m_nativeWindow?.Dispose();
+        NativeWindow?.Dispose();
 
         m_disposed = true;
 
@@ -595,7 +595,7 @@ public partial class Widget : IDisposable
         if (!IsWindow)
             throw new Exception("Widget is not of a window type.");
 
-        if (m_nativeWindow == null)
+        if (NativeWindow == null)
             initializeWindow();
     }
 
@@ -637,7 +637,7 @@ public partial class Widget : IDisposable
 
     internal void UpdateTopLevel(double dt)
     {
-        if (m_nativeWindow == null)
+        if (NativeWindow == null)
             throw new Exception("Native window isn't set!");
 
         Update(dt);
@@ -663,10 +663,10 @@ public partial class Widget : IDisposable
     {
         if (m_height == 0 || m_height == 0)
             return;
-        if (m_nativeWindow == null)
+        if (NativeWindow == null)
             throw new Exception("Native window isn't set!");
 
-        m_nativeWindow.BeginPresent();
+        NativeWindow.BeginPresent();
 
         var rootClip = new SKRect(0, 0, m_width, m_height);
 
@@ -676,11 +676,11 @@ public partial class Widget : IDisposable
             SKSurface surface;
             if (Config.HardwareAccel)
             {
-                surface = SKSurface.Create(m_nativeWindow.GRContext, m_nativeWindow.RenderTarget, GRSurfaceOrigin.BottomLeft, SKColorType.Bgra8888, new SKSurfaceProperties(SKPixelGeometry.RgbHorizontal));
+                surface = SKSurface.Create(NativeWindow.GRContext, NativeWindow.RenderTarget, GRSurfaceOrigin.BottomLeft, SKColorType.Bgra8888, new SKSurfaceProperties(SKPixelGeometry.RgbHorizontal));
             }
             else
             {
-                surface = SKSurface.Create(m_nativeWindow.ImageInfo, m_nativeWindow.SDLSurface->pixels, m_nativeWindow.SDLSurface->pitch, new SKSurfaceProperties(SKPixelGeometry.RgbHorizontal));
+                surface = SKSurface.Create(NativeWindow.ImageInfo, NativeWindow.SdlSurface->pixels, NativeWindow.SdlSurface->pitch, new SKSurfaceProperties(SKPixelGeometry.RgbHorizontal));
             }
             var canvas = surface.Canvas;
 
@@ -690,12 +690,12 @@ public partial class Widget : IDisposable
             // var rootStack = new Stack<SKRect>();
             // rootStack.Push(new SKRect(0, 0, m_width, m_height));
 
-            Paint(canvas, rootClip, m_nativeWindow);
+            Paint(canvas, rootClip, NativeWindow);
 
-            if (!Config.POPUPS_MAKE_WINDOWS)
+            if (!Config.PopupsMakeWindows)
             {
                 rootClip = new SKRect(0, 0, m_width, m_height);
-                PaintPopups(canvas, rootClip, m_nativeWindow);
+                PaintPopups(canvas, rootClip, NativeWindow);
             }
 
             if (debug)
@@ -704,7 +704,7 @@ public partial class Widget : IDisposable
             }
             canvas.Flush();
 
-            m_nativeWindow.GRContext?.Flush();
+            NativeWindow.GRContext?.Flush();
             surface.Dispose();
         }
 
@@ -713,7 +713,7 @@ public partial class Widget : IDisposable
             unsafe
             {
                 // SDL3.SDL_UnlockTexture(m_nativeWindow.SDLTexture);
-                if (!SDL3.SDL_UpdateTexture(m_nativeWindow.SDLTexture, null, m_nativeWindow.SDLSurface->pixels, m_nativeWindow.SDLSurface->pitch))
+                if (!SDL3.SDL_UpdateTexture(NativeWindow.SdlTexture, null, NativeWindow.SdlSurface->pixels, NativeWindow.SdlSurface->pitch))
                 {
                     Console.WriteLine(SDL3.SDL_GetError());
                 }
@@ -724,11 +724,11 @@ public partial class Widget : IDisposable
         {
             unsafe
             {
-                renderWidget(m_nativeWindow.SDLRenderer, m_x, m_y, rootClip);
+                renderWidget(NativeWindow.SdlRenderer, m_x, m_y, rootClip);
             }
         }
 
-        m_nativeWindow.EndPresent();
+        NativeWindow.EndPresent();
     }
 
     internal void PaintPopups(SKCanvas canvas, SKRect clipRect, SkiaWindow window)
@@ -863,7 +863,7 @@ public partial class Widget : IDisposable
         {
             if (current.IsWindow)
                 break;
-            if (!Config.POPUPS_MAKE_WINDOWS && current.m_windowType == WindowType.Popup)
+            if (!Config.PopupsMakeWindows && current.m_windowType == WindowType.Popup)
                 break;
 
             x += current.m_x;
@@ -919,7 +919,7 @@ public partial class Widget : IDisposable
 
     private void initializeWindow()
     {
-        if (m_nativeWindow != null)
+        if (NativeWindow != null)
             return;
 
         Console.WriteLine($"Initialized top level widget of type: {GetType().Name}");
@@ -948,37 +948,37 @@ public partial class Widget : IDisposable
         var parentWidgetCheck = m_parent;
         while (parentWindow == null && parentWidgetCheck != null)
         {
-            parentWindow = parentWidgetCheck.m_nativeWindow;
+            parentWindow = parentWidgetCheck.NativeWindow;
             parentWidgetCheck = parentWidgetCheck.Parent;
         }
 
-        m_nativeWindow = new(this, GetType().Name, flags, parentWindow);
+        NativeWindow = new(this, GetType().Name, flags, parentWindow);
 
-        m_nativeWindow.WindowHolder.Window.Resized += delegate ()
+        NativeWindow.WindowHolder.Window.Resized += delegate ()
         {
-            onNativeWindowResizeEvent(m_nativeWindow.WindowHolder.Window.Size.Width, m_nativeWindow.WindowHolder.Window.Size.Height);
+            onNativeWindowResizeEvent(NativeWindow.WindowHolder.Window.Size.Width, NativeWindow.WindowHolder.Window.Size.Height);
         };
-        m_nativeWindow.WindowHolder.Window.MouseMove += delegate (System.Numerics.Vector2 pos)
+        NativeWindow.WindowHolder.Window.MouseMove += delegate (System.Numerics.Vector2 pos)
         {
             onNativeWindowMouseEvent((int)pos.X, (int)pos.Y, MouseEventType.Move, MouseButton.None);
         };
-        m_nativeWindow.WindowHolder.Window.MouseDown += delegate(System.Numerics.Vector2 pos, MouseButton button)
+        NativeWindow.WindowHolder.Window.MouseDown += delegate(System.Numerics.Vector2 pos, MouseButton button)
         {
             onNativeWindowMouseEvent((int)pos.X, (int)pos.Y, MouseEventType.Down, button);
         };
-        m_nativeWindow.WindowHolder.Window.MouseUp += delegate (System.Numerics.Vector2 pos, MouseButton button)
+        NativeWindow.WindowHolder.Window.MouseUp += delegate (System.Numerics.Vector2 pos, MouseButton button)
         {
             onNativeWindowMouseEvent((int)pos.X, (int)pos.Y, MouseEventType.Up, button);
         };
-        m_nativeWindow.WindowHolder.Window.MouseWheel += delegate (System.Numerics.Vector2 pos, System.Numerics.Vector2 delta, bool precise)
+        NativeWindow.WindowHolder.Window.MouseWheel += delegate (System.Numerics.Vector2 pos, System.Numerics.Vector2 delta, bool precise)
         {
             onNativeWindowMouseEvent((int)pos.X, (int)pos.Y, MouseEventType.Wheel, MouseButton.None, (int)delta.X, (int)delta.Y);
         };
-        m_nativeWindow.WindowHolder.Window.MouseEntered += delegate()
+        NativeWindow.WindowHolder.Window.MouseEntered += delegate()
         {
             // I don't know what I'd use this for right now
         };
-        m_nativeWindow.WindowHolder.Window.MouseLeft += delegate ()
+        NativeWindow.WindowHolder.Window.MouseLeft += delegate ()
         {
             // Simulate mouse exiting
             m_lastHovered?.handleMouseLeave();
@@ -988,7 +988,7 @@ public partial class Widget : IDisposable
 
     private bool isFocusedHack()
     {
-        if (!Config.POPUPS_MAKE_WINDOWS)
+        if (!Config.PopupsMakeWindows)
             return true;
 
         if (s_openPopupMenu != null && this is not MenuBar)

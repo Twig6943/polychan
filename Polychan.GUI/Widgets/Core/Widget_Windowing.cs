@@ -26,7 +26,7 @@ public partial class Widget
 
     private void onNativeWindowMouseEvent(int mouseX, int mouseY, MouseEventType type, MouseButton button, int deltaX = 0, int deltaY = 0)
     {
-        if (Config.POPUPS_MAKE_WINDOWS)
+        if (Config.PopupsMakeWindows)
         {
             if (type == MouseEventType.Down)
             {
@@ -43,7 +43,7 @@ public partial class Widget
         Widget? hovered = null;
 
         // Check popups first
-        if (!Config.POPUPS_MAKE_WINDOWS)
+        if (!Config.PopupsMakeWindows)
         {
             var find = findHoveredPopupWidget(mouseX, mouseY, true);
             if (find != null)
@@ -231,15 +231,15 @@ public partial class Widget
 
             // This is fine because a native window can only exist on top level widgets and thus,
             // can't be in a layout!
-            if (m_nativeWindow != null)
+            if (NativeWindow != null)
             {
-                m_nativeWindow.WindowHolder.Window.Size = new System.Drawing.Size(m_width, m_height);
+                NativeWindow.WindowHolder.Window.Size = new System.Drawing.Size(m_width, m_height);
             }
 
             dispatchResize();
             // callResizeEvents();
         }
-        m_nativeWindow!.CreateFrameBuffer(w, h);
+        NativeWindow!.CreateFrameBuffer(w, h);
 
         Application.CurrentFrame++;
         TriggerRepaint();

@@ -18,12 +18,12 @@ internal static class WindowRegistry
 
     public static void Register(SkiaWindow window)
     {
-        Windows[window.SDLWindowID] = window;
+        Windows[window.SdlWindowId] = window;
     }
 
     public static void Remove(SkiaWindow window)
     {
-        Windows.Remove(window.SDLWindowID);
+        Windows.Remove(window.SdlWindowId);
     }
 
     public static SkiaWindow? Get(SDL.SDL_WindowID id) =>

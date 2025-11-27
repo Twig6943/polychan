@@ -29,8 +29,8 @@ public class NormalWindow : WindowWidget, IPaintHandler, IResizeHandler
 
     public void SetIconFromStream(Stream imageStream)
     {
-        Debug.Assert(m_nativeWindow != null);
-        m_nativeWindow.WindowHolder.Window.SetIconFromStream(imageStream);
+        Debug.Assert(NativeWindow != null);
+        NativeWindow.WindowHolder.Window.SetIconFromStream(imageStream);
     }
 
     #endregion
