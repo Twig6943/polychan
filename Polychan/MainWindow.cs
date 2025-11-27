@@ -8,7 +8,7 @@ using Polychan.Widgets;
 
 namespace Polychan;
 
-public class PolychanWindow : MainWindow, IResizeHandler, IMouseDownHandler
+public class PolychanWindow : NormalWindow, IResizeHandler, IMouseDownHandler
 {
     private readonly List<ThreadWidget> m_threadWidgets = [];
     private readonly Dictionary<int, PostWidgetContainer> m_postWidgets = [];

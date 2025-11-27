@@ -5,7 +5,7 @@ using SkiaSharp;
 
 namespace Polychan;
 
-public class MinTestWindow : MainWindow, IMouseDownHandler, IMouseMoveHandler, IMouseUpHandler
+public class MinTestWindow : NormalWindow, IMouseDownHandler, IMouseMoveHandler, IMouseUpHandler
 {
     private ScrollArea m_postsListWidget;
     private readonly Dictionary<int, PostWidgetContainer> m_postWidgets = [];

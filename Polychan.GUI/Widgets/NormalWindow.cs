@@ -3,13 +3,13 @@ using SkiaSharp;
 
 namespace Polychan.GUI.Widgets;
 
-public class MainWindow : WindowWidget, IPaintHandler, IResizeHandler
+public class NormalWindow : WindowWidget, IPaintHandler, IResizeHandler
 {
     public MenuBar? MenuBar { get; set; }
     public ToolBar? ToolBar { get; set; }
     public Widget? CentralWidget = null;
 
-    public MainWindow(Widget? parent = null) : base(WindowType.Window, parent)
+    public NormalWindow(Widget? parent = null) : base(WindowType.Window, parent)
     {
 
     }
