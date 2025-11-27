@@ -1,5 +1,5 @@
-﻿using Polychan.GUI.Layouts;
-using SkiaSharp;
+﻿using Polychan.Framework;
+using Polychan.GUI.Layouts;
 
 namespace Polychan.GUI.Widgets;
 

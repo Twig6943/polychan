@@ -4,7 +4,7 @@
     {
         private static void Main(string[] args)
         {
-            ChanApp.Start();
+            App.ChanApp.Start();
         }
     }
 }

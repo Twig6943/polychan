@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Polychan\Polychan.csproj" />
+    <ProjectReference Include="..\Polychan.App\Polychan.App.csproj" />
   </ItemGroup>
 
 </Project>
