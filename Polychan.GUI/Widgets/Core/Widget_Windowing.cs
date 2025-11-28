@@ -81,7 +81,7 @@ public partial class Widget
         }
 
         // Console.WriteLine($"{this.Name}, {hovered?.Name}, ({mouseX}, {mouseY})");
-
+        
         // If there's a mouse grabber, it always receives input!
         if (s_mouseGrabber != null && s_mouseGrabber.Enabled)
         {
@@ -137,6 +137,7 @@ public partial class Widget
         // No grabber - do regular hit testing.
         if (hovered != null)
         {
+            
             switch (type)
             {
                 case MouseEventType.Down:
@@ -175,13 +176,13 @@ public partial class Widget
         }
     }
 
-    private bool bubbleMouseEvent(Widget widget, MouseEventType type, MouseButton button, int globalX, int globalY, int dx = 0, int dy = 0)
+    private bool bubbleMouseEvent(Widget? widget, MouseEventType type, MouseButton button, int globalX, int globalY, int dx = 0, int dy = 0)
     {
         while (widget != null)
         {
             if (!widget.Enabled)
             {
-                widget = widget.Parent!;
+                widget = widget.Parent;
                 continue;
             }
 
@@ -208,7 +209,13 @@ public partial class Widget
             bool handled = type switch
             {
                 MouseEventType.Move => (widget as IMouseMoveHandler)?.OnMouseMove(lx, ly) ?? false,
-                MouseEventType.Down => (widget as IMouseDownHandler)?.OnMouseDown(mouseEvent) ?? false,
+                // @TODO, @HACK - because a widget can implement IMouseClickHandler but not IMouseDownHandler, this can return false and OnMouseClick() will never be called.
+                // So this will have to do for now!
+                // I did this @HACK specifically because right click stopped working for post widgets...
+                // But it worked before I added TabController?
+                // My working theory is that it worked before because it laid inside the window with no other containers.
+                // I'm not sure, please investigate!
+                MouseEventType.Down => (widget as IMouseDownHandler)?.OnMouseDown(mouseEvent) ?? (widget is IMouseClickHandler) ? true : false,
                 MouseEventType.Up => (widget as IMouseUpHandler)?.OnMouseUp(mouseEvent) ?? false,
                 MouseEventType.Wheel => (widget as IMouseWheelHandler)?.OnMouseScroll(scrollEvent) ?? false,
                 _ => false
@@ -217,7 +224,7 @@ public partial class Widget
             if (handled) return true;
             if (widget.IsWindow) return false;
 
-            widget = widget.Parent!;
+            widget = widget.Parent;
         }
 
         return false;

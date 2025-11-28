@@ -14,6 +14,7 @@ public class PostsView : Widget
     public PostsView(string threadID, Widget? parent = null) : base(parent)
     {
         Name = "Posts View";
+        CatchCursorEvents = false;
 
         Fitting = FitPolicy.ExpandingPolicy;
         Layout = new VBoxLayout();

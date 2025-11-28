@@ -166,7 +166,7 @@ public class PostWidgetContainer : Widget, IPaintHandler
     #endregion
 }
 
-public class PostWidget : Widget, IMouseClickHandler, IPaintHandler
+public class PostWidget : Widget, IPaintHandler, IMouseClickHandler
 {
     private readonly PostThumbnail m_previewBitmap;
     private readonly Label m_nameLabel;

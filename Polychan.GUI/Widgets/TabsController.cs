@@ -52,6 +52,7 @@ public class TabsController : Widget, IPaintHandler
     
     public TabsController(Widget? parent = null) : base(parent)
     {
+        CatchCursorEvents = false;
         Layout = new VBoxLayout()
         {
             Spacing = 0,
@@ -60,7 +61,8 @@ public class TabsController : Widget, IPaintHandler
         {
             Fitting = new FitPolicy(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed),
             Height = TAB_HEIGHT,
-            Layout = new HBoxLayout()
+            Layout = new HBoxLayout(),
+            CatchCursorEvents = false
         };
         m_contentHolder = new NullWidget(this)
         {
@@ -68,7 +70,8 @@ public class TabsController : Widget, IPaintHandler
             Layout = new HBoxLayout()
             {
                 Padding = new Padding(0)
-            }
+            },
+            CatchCursorEvents = false
         };
     }
 

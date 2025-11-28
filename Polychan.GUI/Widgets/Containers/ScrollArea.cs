@@ -113,7 +113,7 @@ public class ScrollArea : Widget, IMouseWheelHandler
         newValue = Math.Clamp(newValue, VerticalScrollbar.Minimum, VerticalScrollbar.Maximum);
         VerticalScrollbar.Value = newValue;
 
-        return true;
+        return false;
     }
 
     public override void OnUpdate(double dt)
