@@ -172,7 +172,6 @@ public partial class Widget : IDisposable
             {
                 m_enabled = value;
                 TriggerRepaint();
-                // NotifyLayoutChange();
             }
         }
     }
