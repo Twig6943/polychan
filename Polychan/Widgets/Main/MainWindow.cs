@@ -1,0 +1,250 @@
+﻿using MaterialDesign;
+using SkiaSharp;
+using Polychan.GUI;
+using Polychan.GUI.Layouts;
+using Polychan.GUI.Widgets;
+using Polychan.App.Widgets;
+
+namespace Polychan.App;
+
+public class MainWindow : NormalWindow
+{
+    private readonly CatalogListView m_catalogListView;
+    private readonly TabsController m_postTabs;
+
+    public MainWindow()
+    {
+        Layout = new VBoxLayout();//
+
+        void OpenSettings()
+        {
+            new SettingsDialog(this).Show();
+        }
+
+        void Refresh()
+        {
+            ChanApp.LoadCatalog(ChanApp.Client.CurrentBoard);
+        }
+
+        void ShowAbout()
+        {
+            new AboutDialog(this).Show();
+        }
+
+        // Setup MenuBar
+        {
+            MenuBar = new(this)
+            {
+                Width = this.Width,
+                ScreenPosition = MenuBar.Orientation.Top,
+
+                Fitting = new(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed)
+            };
+            void AddMenu(string title, MenuAction[] items)
+            {
+                var menu = MenuBar.AddMenu(title);
+                foreach (var item in items)
+                {
+                    menu.AddAction(item);
+                }
+            }
+            AddMenu("File", [
+                new(MaterialIcons.Settings, "Preferences", OpenSettings),
+                new("")
+                {
+                    IsSeparator = true,
+                },
+                new(MaterialIcons.DoorFront, "Exit", () => {
+                    this.Dispose();
+                }),
+            ]);
+            AddMenu("Actions", [
+                new(MaterialIcons.Refresh, "Refresh All", Refresh),
+            ]);
+            AddMenu("Tools", [
+                new(MaterialIcons.Cloud, "Thread Downloader"),
+                new(MaterialIcons.Terminal, "Toggle System Console"),
+            ]);
+            AddMenu("Help", [
+                new(MaterialIcons.Public, "Website", () => {
+                    Application.OpenURL("https://polychan.net");
+                }),
+                new(MaterialIcons.ImportContacts, "Wiki", () => {
+                    Application.OpenURL("https://github.com/Starpelly/Polychan/wiki");
+                }),
+                new("")
+                {
+                    IsSeparator = true,
+                },
+                new(MaterialIcons.Code, "Source Code", () => {
+                    Application.OpenURL("https://github.com/Starpelly/Polychan");
+                }),
+
+                new(MaterialIcons.Info, "About Polychan", ShowAbout)
+            ]);
+        }
+        
+        // Setup ToolBar
+        {
+            ToolBar = new ToolBar(this)
+            {
+                Fitting = new FitPolicy(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed)
+            };
+            ToolBar.AddAction(new MenuAction(MaterialIcons.Add, "New"));
+            ToolBar.AddAction(new MenuAction(MaterialIcons.FolderOpen, "Open"));
+            ToolBar.AddSeparator();
+            ToolBar.AddAction(new MenuAction(MaterialIcons.Refresh, "Refresh", Refresh));
+            ToolBar.AddSeparator();
+            ToolBar.AddAction(new MenuAction(MaterialIcons.Settings, "Settings", OpenSettings));
+            ToolBar.AddAction(new MenuAction(MaterialIcons.Info, "About", ShowAbout));
+
+            new HLine(this)
+            {
+                Fitting = new FitPolicy(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed)
+            };
+        }
+
+        CentralWidget = new(this)
+        {
+            Fitting = FitPolicy.ExpandingPolicy
+        };
+
+        // Setup UI
+        {
+            CentralWidget!.Layout = new HBoxLayout
+            {
+                Padding = new(16)
+            };
+
+            Widget mainHolder = CentralWidget;
+            mainHolder = new ShapedFrame(CentralWidget)
+            {
+                Fitting = FitPolicy.ExpandingPolicy,
+                Layout = new HBoxLayout
+                {
+                }
+            };
+
+            // Boards list
+            /*
+            {
+                var boardsListHolder = new NullWidget(mainHolder)
+                {
+                    Fitting = new(FitPolicy.Policy.Fixed, FitPolicy.Policy.Expanding),
+                    Width = 158,
+
+                    Layout = new VBoxLayout { }
+                };
+
+                var m_boardsListWidget = new ScrollArea(boardsListHolder)
+                {
+                    Fitting = FitPolicy.ExpandingPolicy
+                };
+                // m_boardsListWidget.VerticalScrollbar.Visible = false;
+
+                m_boardsListWidget.ContentFrame.Layout = new HBoxLayout
+                {
+                };
+
+                m_boardsListWidget.ChildWidget = new NullWidget(m_boardsListWidget.ContentFrame)
+                {
+                    Fitting = new(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed),
+                    AutoSizing = new(SizePolicy.Policy.Ignore, SizePolicy.Policy.Fit),
+                    Layout = new VBoxLayout
+                    {
+                        Padding = new(8),
+                        Spacing = 4,
+                    },
+                    Name = "Boards Lists Holder"
+                };
+
+                foreach (var board in ChanApp.Client.Boards.Boards)
+                {
+                    new PushButton(board.Title, m_boardsListWidget.ChildWidget)
+                    {
+                        Fitting = new(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed),
+                        OnClicked = () =>
+                        {
+                            ChanApp.LoadCatalog(board.URL);
+                        }
+                    };
+                }
+            }
+            */
+            
+            // SideBar
+            {
+                new SideBar(mainHolder)
+                {
+                    Fitting = new(FitPolicy.Policy.Fixed, FitPolicy.Policy.Expanding),
+                    Width = 140
+                };
+                CreateSeparator();
+            }
+
+            // Threads list
+            m_catalogListView = new CatalogListView(mainHolder);
+            
+            CreateSeparator();
+
+            m_postTabs = new TabsController(mainHolder)
+            {
+                Fitting = FitPolicy.ExpandingPolicy
+            };
+            m_postTabs.AddTab(new Rect(SKColors.Red, m_postTabs)
+            {
+                Width = 32,
+                Height = 32
+            }, "Red Square");
+            
+            void CreateSeparator()
+            {
+                new VLine(mainHolder)
+                {
+                    Fitting = new FitPolicy(FitPolicy.Policy.Fixed, FitPolicy.Policy.Expanding),
+                };
+            }
+        }
+    }
+    
+    public static Label TabInfoWidgetThing(Widget parent)
+    {
+        // @TODO
+        // Add anchor points
+        var bg = new Rect(Application.Palette.Get(ColorRole.Window), parent)
+        {
+            Fitting = new(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed),
+            Height = 48,
+
+            Layout = new HBoxLayout
+            {
+                Padding = new(12, 8)
+            }
+        };
+        var w = new Label(bg)
+        {
+            Fitting = FitPolicy.ExpandingPolicy,
+            Anchor = Label.TextAnchor.CenterLeft,
+        };
+
+        // Separator
+        new HLine(parent)
+        {
+            Fitting = new(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed),
+            Height = 1
+        };
+        return w;
+    }
+
+    public void LoadBoardCatalog(string board)
+    {
+        m_catalogListView.LoadCatalog(board);
+        m_catalogListView.T();
+    }
+
+    public void LoadThreadPosts(string threadId)
+    {
+        var view = new PostsView(threadId, m_postTabs);
+        m_postTabs.AddTab(view, threadId);
+    }
+}

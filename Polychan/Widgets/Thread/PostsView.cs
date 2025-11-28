@@ -1,0 +1,150 @@
+﻿using Polychan.App.Widgets;
+using Polychan.GUI.Layouts;
+using Polychan.GUI.Widgets;
+
+namespace Polychan.App;
+
+public class PostsView : Widget
+{
+    private readonly Dictionary<int, PostWidgetContainer> m_postWidgets = [];
+    
+    private readonly ScrollArea? m_postsListWidget;
+    private readonly Label m_threadTitleLabel;
+    
+    public PostsView(string threadID, Widget? parent = null) : base(parent)
+    {
+        Name = "Posts View";
+
+        Fitting = FitPolicy.ExpandingPolicy;
+        Layout = new VBoxLayout();
+        var postsListHolder = this;
+        
+        /*
+        var postsListHolder = new NullWidget(this)
+        {
+            Fitting = FitPolicy.ExpandingPolicy,
+            Width = 500,
+            Height = 500,
+
+            Layout = new VBoxLayout
+            {
+            }
+        };
+        */
+
+        m_threadTitleLabel = MainWindow.TabInfoWidgetThing(postsListHolder);
+        m_threadTitleLabel.Text = $"<span class=\"header\">/{ChanApp.Client.CurrentBoard}/{threadID}/ - {ChanApp.Client.CurrentThread.Posts[0].Sub}</span>";
+
+        m_postsListWidget = new ScrollArea(postsListHolder)
+        {
+            Fitting = FitPolicy.ExpandingPolicy,
+            Name = "Main Content Holder"
+        };
+        m_postsListWidget.ContentFrame.Layout = new HBoxLayout
+        {
+        };
+        m_postsListWidget.ChildWidget = new NullWidget(m_postsListWidget.ContentFrame)
+        {
+            Fitting = new FitPolicy(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed),
+            AutoSizing = new SizePolicy(SizePolicy.Policy.Ignore, SizePolicy.Policy.Fit),
+            Layout = new VBoxLayout
+            {
+                Spacing = 1,
+            },
+            Name = "Posts Lists Holder"
+        };
+        
+        var imageIDs = new Dictionary<long, PostWidgetContainer>();
+
+        foreach (var post in ChanApp.Client.CurrentThread.Posts)
+        {
+            var widget = new PostWidgetContainer(this, post, m_postsListWidget.ChildWidget)
+            {
+                Fitting = new FitPolicy(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed)
+            };
+            m_postWidgets.Add(post.No, widget);
+
+            if (post.Tim is > 0)
+            {
+                imageIDs.Add((long)post.Tim, widget);
+            }
+        }
+
+        LoadPostPreviews(m_postWidgets);
+
+        // Load thumbnails for posts
+        _ = ChanApp.Client.LoadThumbnailsAsync(imageIDs.Keys, (tim, image) =>
+        {
+            if (image != null)
+            {
+                imageIDs[tim].Test.SetBitmapPreview(image);
+            }
+        });
+    }
+    
+    public void LoadPostPreviews(Dictionary<int, PostWidgetContainer> widgetsToUpdate)
+    {
+        var refPosts = new Dictionary<int, List<PostWidgetContainer>>();
+        var imageIDs = new Dictionary<long, PostWidgetContainer>();
+
+        foreach (var key in widgetsToUpdate.Keys)
+        {
+            refPosts.Add(key, []);
+
+            var post = widgetsToUpdate[key].ApiPost;
+            if (post.Tim != null && post.Tim > 0)
+            {
+                imageIDs.Add((long)post.Tim, widgetsToUpdate[key]);
+            }
+        }
+
+        foreach (var widget in m_postWidgets)
+        {
+            foreach (var refID in widget.Value.ReferencedPosts)
+            {
+                if (int.TryParse(refID, out var id))
+                {
+                    // if (postWidgets.TryGetValue(id, out var value))
+                    if (widgetsToUpdate.ContainsKey(id))
+                    {
+                        // list.Add(value);
+                        refPosts[id].Add(widget.Value);
+                    }
+                    else
+                    {
+                        // @NOTE
+                        // So this indicates the post comes from another thread
+                        // I need to add a case to handle this!
+                    }
+                }
+            }
+        }
+
+        foreach (var post in refPosts)
+        {
+            widgetsToUpdate[post.Key].SetReplies(post.Value);
+        }
+
+        // Load thumbnails for posts
+        _ = ChanApp.Client.LoadThumbnailsAsync(imageIDs.Keys, (tim, image) =>
+        {
+            if (image != null)
+            {
+                imageIDs[tim].Test.SetBitmapPreview(image);
+            }
+        });
+    }
+    
+    private void clearPosts()
+    {
+        if (m_postsListWidget == null)
+            return;
+
+        foreach (var widget in m_postWidgets)
+        {
+            widget.Value.Dispose(); // I'm thinking this should defer to the next event loop? It could cause problems...
+        }
+        m_postWidgets.Clear();
+        m_postsListWidget.VerticalScrollbar.Value = 0;
+    }
+}
