@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Polychan.API.Models;
+namespace FChan.Models;
 
 /// <summary>
 /// Represents a page in the 4chan board catalog.
@@ -27,7 +27,7 @@ public class CatalogThread
 {
     /// <summary>The numeric post ID.</summary>
     [JsonProperty("no")]
-    public long No { get; set; }
+    public PostId No { get; set; }
 
     /// <summary>Thread ID this post is replying to. Zero for OP.</summary>
     [JsonProperty("resto")]
@@ -86,7 +86,7 @@ public class CatalogThread
     /// This can also be used to grab the image attached to the post.
     /// </summary>
     [JsonProperty("tim")]
-    public AttachmentID? Tim { get; set; }
+    public AttachmentId? Tim { get; set; }
 
     /// <summary>Original filename as uploaded.</summary>
     [JsonProperty("filename")]

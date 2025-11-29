@@ -265,7 +265,7 @@ public class MainWindow : NormalWindow
         m_catalogListView.T();
     }
 
-    public void LoadThreadPosts(API.Models.Thread thread, long threadId)
+    public void LoadThreadPosts(FChan.Models.Thread thread, FChan.Models.PostId threadId)
     {
         var view = new PostsView(threadId, m_postTabs);
         m_postTabs.AddTab(view, $"{threadId}");

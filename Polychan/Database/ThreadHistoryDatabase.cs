@@ -44,7 +44,7 @@ public class ThreadHistoryDatabase
         cmd.ExecuteNonQuery();
     }
 
-    public void SaveVisit(long threadId, string board, string json, byte[] thumbnail)
+    public void SaveVisit(FChan.Models.PostId threadId, string board, string json, byte[] thumbnail)
     {
         using var conn = new SqliteConnection(m_connectionString);
         conn.Open();
@@ -58,7 +58,7 @@ public class ThreadHistoryDatabase
                 json = $json,
                 visited_at = $ts;
             """;
-        cmd.Parameters.AddWithValue("$id", threadId);
+        cmd.Parameters.AddWithValue("$id", threadId.Value);
         cmd.Parameters.AddWithValue("$board", board);
         cmd.Parameters.AddWithValue("$json", json);
         cmd.Parameters.AddWithValue("$thumbnail", thumbnail);

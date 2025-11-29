@@ -1,17 +1,16 @@
-﻿using Polychan.API.Models;
-using Polychan.GUI.Layouts;
+﻿using Polychan.GUI.Layouts;
 using Polychan.GUI.Widgets;
 
 namespace Polychan.App.Widgets;
 
 public class CatalogListView : Widget
 {
-    private readonly Dictionary<Int64, ThreadTicketWidget> m_threadWidgets = [];
+    private readonly Dictionary<FChan.Models.PostId, ThreadTicketWidget> m_threadWidgets = [];
     
     private readonly ScrollArea? m_threadsListWidget;
     private readonly Label m_boardTitleLabel;
     
-    public IReadOnlyDictionary<Int64, ThreadTicketWidget> Threads => m_threadWidgets;
+    public IReadOnlyDictionary<FChan.Models.PostId, ThreadTicketWidget> Threads => m_threadWidgets;
     
     public CatalogListView(Widget? parent = null) : base(parent)
     {
@@ -61,7 +60,7 @@ public class CatalogListView : Widget
             return;
         m_boardTitleLabel.Text = $"<span class=\"header\">/{board}/ - {ChanApp.Client.Boards.Boards.Find(c => c.URL == board).Title}</span>";
 
-        void LoadPage(CatalogPage page)
+        void LoadPage(FChan.Models.CatalogPage page)
         {
             foreach (var thread in page.Threads)
             {

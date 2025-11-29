@@ -1,9 +1,6 @@
-﻿global using PostID = long;
-global using AttachmentID = long;
+﻿using Newtonsoft.Json;
 
-using Newtonsoft.Json;
-
-namespace Polychan.API.Models;
+namespace FChan.Models;
 
 public class Model
 {
@@ -17,7 +14,7 @@ public class Model
 public class Thread : Model
 {
     [JsonIgnore]
-    public int No => Posts[0].No;
+    public PostId No => Posts[0].No;
 
     [JsonProperty("posts")]
     public List<Post> Posts = [];
@@ -29,7 +26,7 @@ public class Thread : Model
 public class Post : Model
 {
     [JsonProperty("no")]
-    public int No;
+    public PostId No;
 
     [JsonProperty("resto")]
     public int Resto;
@@ -81,7 +78,7 @@ public class Post : Model
     /// This can also be used to grab the image attached to the post.
     /// </summary>
     [JsonProperty("tim")]
-    public AttachmentID? Tim;
+    public AttachmentId? Tim;
 
     [JsonProperty("filename")]
     public string Filename = string.Empty;

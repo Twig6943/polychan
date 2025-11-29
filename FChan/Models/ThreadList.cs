@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Polychan.API.Models;
+namespace FChan.Models;
 
 public struct ThreadList
 {

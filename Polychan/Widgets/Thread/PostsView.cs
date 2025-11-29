@@ -6,12 +6,12 @@ namespace Polychan.App;
 
 public class PostsView : Widget
 {
-    private readonly Dictionary<PostID, PostWidgetContainer> m_postWidgets = [];
+    private readonly Dictionary<FChan.Models.PostId, PostWidgetContainer> m_postWidgets = [];
     
     private readonly ScrollArea? m_postsListWidget;
     private readonly Label m_threadTitleLabel;
     
-    public PostsView(long threadId, Widget? parent = null) : base(parent)
+    public PostsView(FChan.Models.PostId threadId, Widget? parent = null) : base(parent)
     {
         Name = "Posts View";
         CatchCursorEvents = false;
@@ -53,9 +53,9 @@ public class PostsView : Widget
         LoadPostPreviews(m_postWidgets);
     }
     
-    public void LoadPostPreviews(Dictionary<PostID, PostWidgetContainer> widgetsToUpdate)
+    public void LoadPostPreviews(Dictionary<FChan.Models.PostId, PostWidgetContainer> widgetsToUpdate)
     {
-        var refPosts = new Dictionary<PostID, List<PostWidgetContainer>>();
+        var refPosts = new Dictionary<FChan.Models.PostId, List<PostWidgetContainer>>();
 
         foreach (var key in widgetsToUpdate.Keys)
         {
@@ -66,8 +66,9 @@ public class PostsView : Widget
         {
             foreach (var refID in widget.Value.ReferencedPosts)
             {
-                if (int.TryParse(refID, out var id))
+                if (long.TryParse(refID, out var lid))
                 {
+                    var id = new FChan.Models.PostId(lid);
                     // if (postWidgets.TryGetValue(id, out var value))
                     if (widgetsToUpdate.ContainsKey(id))
                     {

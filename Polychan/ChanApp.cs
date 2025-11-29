@@ -62,7 +62,7 @@ public static class ChanApp
         MainWindow.Title = $"Polychan - /{board}/";
     }
 
-    public static void LoadThread(long threadId)
+    public static void LoadThread(FChan.Models.PostId threadId)
     {
         Client.CurrentThread = Client.GetThreadPostsAsync(threadId).GetAwaiter().GetResult();
 

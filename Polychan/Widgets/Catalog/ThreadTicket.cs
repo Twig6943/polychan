@@ -3,7 +3,7 @@ using Polychan.GUI.Input;
 using Polychan.GUI.Widgets;
 using SkiaSharp;
 using System.Net;
-using Polychan.API.Models;
+using FChan.Models;
 
 namespace Polychan.App.Widgets;
 

@@ -1,5 +1,4 @@
-﻿using Polychan.API.Models;
-using Polychan.GUI;
+﻿using Polychan.GUI;
 using Polychan.GUI.Layouts;
 using Polychan.GUI.Widgets;
 using SkiaSharp;
@@ -21,11 +20,11 @@ public class PostWidgetContainer : Widget, IPaintHandler
     private NullWidget? m_repliesHolder;
     private PushButton? m_showRepliesButton;
 
-    public Post ApiPost => m_postWidget.ApiPost;
+    public FChan.Models.Post ApiPost => m_postWidget.ApiPost;
     public List<string> ReferencedPosts => m_postWidget.ReferencedPosts;
     public PostWidget Widget => m_postWidget; // @TEMP
     
-    public PostWidgetContainer(PostsView view, Post post, Widget? parent = null) : base(parent)
+    public PostWidgetContainer(PostsView view, FChan.Models.Post post, Widget? parent = null) : base(parent)
     {
         m_view = view;
         
@@ -110,7 +109,7 @@ public class PostWidgetContainer : Widget, IPaintHandler
             },
         };
 
-        var pw = new Dictionary<PostID, PostWidgetContainer>(replies.Count);
+        var pw = new Dictionary<FChan.Models.PostId, PostWidgetContainer>(replies.Count);
         foreach (var item in replies)
         {
             var widget = new PostWidgetContainer(m_view, item.m_postWidget.ApiPost, m_repliesHolder)

@@ -6,7 +6,6 @@ using Polychan.GUI.Widgets;
 using Polychan.App.Utils;
 using SkiaSharp;
 using System.Net;
-using Polychan.API.Models;
 
 namespace Polychan.App.Widgets;
 
@@ -20,10 +19,10 @@ public class PostWidget : Widget, IPaintHandler, IMouseClickHandler
     private readonly Label m_commentLabel;
     private readonly Label m_repliesLabel;
 
-    public Post ApiPost { get; }
+    public FChan.Models.Post ApiPost { get; }
     public readonly List<string> ReferencedPosts = [];
 
-    public PostWidget(API.Models.Post post, Widget? parent = null) : base(parent)
+    public PostWidget(FChan.Models.Post post, Widget? parent = null) : base(parent)
     {
         Name = "A Post widget!!!";
         ShouldCache = true;

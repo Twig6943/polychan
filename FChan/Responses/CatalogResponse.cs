@@ -1,4 +1,4 @@
-﻿namespace Polychan.API.Responses;
+﻿namespace FChan.Responses;
 
 public class CatalogResponse
 {

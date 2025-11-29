@@ -5,13 +5,8 @@ using SkiaSharp;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Web;
-using Polychan.API;
-using Polychan.API.Models;
-using Polychan.API.Responses;
 
 namespace Polychan.App;
-
-using Models_Thread = API.Models.Thread;
 
 public class FourChanClient
 {
@@ -20,10 +15,10 @@ public class FourChanClient
     private readonly SemaphoreSlim m_throttler = new(8); // 8 concurrent downloads
 
     public string CurrentBoard { get; set; } = string.Empty;
-    public Models_Thread CurrentThread { get; set; }
+    public FChan.Models.Thread CurrentThread { get; set; }
 
-    public BoardsResponse Boards;
-    public CatalogResponse Catalog;
+    public FChan.Responses.BoardsResponse Boards;
+    public FChan.Responses.CatalogResponse Catalog;
 
     public FourChanClient()
     {
@@ -81,40 +76,40 @@ public class FourChanClient
         }
     }
 
-    public async Task<BoardsResponse> GetBoardsAsync()
+    public async Task<FChan.Responses.BoardsResponse> GetBoardsAsync()
     {
-        var url = $"https://{Domains.Api}/boards.json";
+        var url = $"https://{FChan.Domains.Api}/boards.json";
         var json = await m_httpClient.GetStringAsync(url);
 
-        var result = JsonConvert.DeserializeObject<BoardsResponse>(json);
+        var result = JsonConvert.DeserializeObject<FChan.Responses.BoardsResponse>(json);
         return result;
     }
 
-    public async Task<CatalogResponse> GetCatalogAsync()
+    public async Task<FChan.Responses.CatalogResponse> GetCatalogAsync()
     {
-        var url = $"https://{Domains.Api}/{CurrentBoard}/catalog.json";
+        var url = $"https://{FChan.Domains.Api}/{CurrentBoard}/catalog.json";
         var json = await m_httpClient.GetStringAsync(url);
 
-        var result = JsonConvert.DeserializeObject<List<CatalogPage>>(json);
+        var result = JsonConvert.DeserializeObject<List<FChan.Models.CatalogPage>>(json);
         return new()
         {
             Pages = result!
         };
     }
 
-    public async Task<Models_Thread> GetThreadPostsAsync(long threadId)
+    public async Task<FChan.Models.Thread> GetThreadPostsAsync(FChan.Models.PostId threadId)
     {
-        var url = $"https://{Domains.Api}/{CurrentBoard}/thread/{threadId}.json";
+        var url = $"https://{FChan.Domains.Api}/{CurrentBoard}/thread/{threadId}.json";
         var json = await m_httpClient.GetStringAsync(url);
 
-        var result = JsonConvert.DeserializeObject<Models_Thread>(json);
+        var result = JsonConvert.DeserializeObject<FChan.Models.Thread>(json);
         result.OriginalJson = json;
         return result;
     }
 
-    public async Task<SKImage?> DownloadThumbnailAsync(AttachmentID tim)
+    public async Task<SKImage?> DownloadThumbnailFromPostURLAsync(FChan.Models.AttachmentId tim)
     {
-        string url = $"https://{Domains.UserContent}/{CurrentBoard}/{tim}s.jpg";
+        string url = $"https://{FChan.Domains.UserContent}/{CurrentBoard}/{tim}s.jpg";
 
         try
         {
@@ -128,9 +123,9 @@ public class FourChanClient
         }
     }
 
-    public async Task DownloadAttachmentAsync(Post post, Action<SKImage?> onComplete)
+    public async Task DownloadAttachmentFromPostURLAsync(FChan.Models.Post post, Action<SKImage?> onComplete)
     {
-        string url = $"https://{Domains.UserContent}/{CurrentBoard}/{post.Tim}{post.Ext}";
+        string url = $"https://{FChan.Domains.UserContent}/{CurrentBoard}/{post.Tim}{post.Ext}";
 
         try
         {
@@ -146,7 +141,7 @@ public class FourChanClient
         }
     }
 
-    public async Task LoadThumbnailsAsync(IEnumerable<(PostID thread, AttachmentID? attachment)> imageIds, Action<PostID, SKImage?> onComplete)
+    public async Task LoadThumbnailsAsync(IEnumerable<(FChan.Models.PostId thread, FChan.Models.AttachmentId? attachment)> imageIds, Action<FChan.Models.PostId, SKImage?> onComplete)
     {
         var tasks = imageIds.Select(async tim =>
         {
@@ -155,7 +150,7 @@ public class FourChanClient
             {
                 if (tim.attachment != null)
                 {
-                    var img = await DownloadThumbnailAsync((AttachmentID)tim.attachment);
+                    var img = await DownloadThumbnailFromPostURLAsync((FChan.Models.AttachmentId)tim.attachment);
 
                     if (img != null)
                     {

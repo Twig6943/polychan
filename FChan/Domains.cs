@@ -1,4 +1,4 @@
-﻿namespace Polychan.API;
+﻿namespace FChan;
 
 public static class Domains
 {

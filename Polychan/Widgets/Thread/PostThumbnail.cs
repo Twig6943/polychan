@@ -1,8 +1,8 @@
 ﻿using Polychan.GUI.Widgets;
 using Polychan.GUI;
 using SkiaSharp;
-using Polychan.API;
-using Polychan.API.Models;
+using FChan;
+using FChan.Models;
 using Polychan.App.Utils;
 
 namespace Polychan.App.Widgets;
@@ -161,7 +161,7 @@ public class PostThumbnail : Image, IPaintHandler, IMouseDownHandler, IMouseEnte
         }
         else
         {
-            _ = ChanApp.Client.DownloadAttachmentAsync(m_apiPost, (thumbnail) =>
+            _ = ChanApp.Client.DownloadAttachmentFromPostURLAsync(m_apiPost, (thumbnail) =>
             {
                 if (thumbnail != null)
                 {
