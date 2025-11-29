@@ -1,11 +1,12 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using FChan.Models;
+using Microsoft.Data.Sqlite;
 
 namespace Polychan.App.Database;
 
 public class ThreadHistoryEntry
 {
     public long Id { get; set; }
-    public int ThreadId { get; set; }
+    public PostId ThreadId { get; set; }
     public string Board { get; set; }
     public string Json { get; set; }
     public byte[]? Thumbnail { get; set; }
@@ -53,12 +54,12 @@ public class ThreadHistoryDatabase
         cmd.CommandText =
             """
             INSERT INTO thread_history (thread_id, board, json, thumbnail, visited_at)
-            VALUES ($id, $board, $json, $thumbnail, $ts)
+            VALUES ($thread_id, $board, $json, $thumbnail, $ts)
             ON CONFLICT(thread_id, board) DO UPDATE SET
                 json = $json,
                 visited_at = $ts;
             """;
-        cmd.Parameters.AddWithValue("$id", threadId.Value);
+        cmd.Parameters.AddWithValue("$thread_id", threadId.Value);
         cmd.Parameters.AddWithValue("$board", board);
         cmd.Parameters.AddWithValue("$json", json);
         cmd.Parameters.AddWithValue("$thumbnail", thumbnail);
@@ -87,7 +88,7 @@ public class ThreadHistoryDatabase
             results.Add(new ThreadHistoryEntry
             {
                 Id = reader.GetInt64(0),
-                ThreadId = reader.GetInt32(1),
+                ThreadId = new PostId(reader.GetInt32(1)),
                 Board = reader.GetString(2),
                 Json = reader.GetString(3),
                 Thumbnail = reader.IsDBNull(4) ? null : reader.GetFieldValue<byte[]>(4),
