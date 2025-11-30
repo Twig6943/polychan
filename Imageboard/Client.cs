@@ -136,14 +136,20 @@ public class Client
                     Pinned = fourthread.Sticky == 1,
                     Locked = fourthread.Closed == 1,
                     RawCommentContent = new RawCommentContent(fourthread.Com),
-                    Attachment = new Attachment()
+                    Attachment = null
+                };
+                if (fourthread.Tim != null)
+                {
+                    pages[i].Threads[ii].Attachment = new Attachment()
                     {
                         BigUrl = $"https://{Backends.FChan.Domains.UserContent}/{board.Id}/{fourthread.Tim}{fourthread.Ext}",
                         SmallUrl = $"https://{Backends.FChan.Domains.UserContent}/{board.Id}/{fourthread.Tim}s.jpg",
-                        Ext =  fourthread.Ext,
+                        FileName = fourthread.Filename,
+                        FileSize = (long)fourthread.Fsize!,
+                        Ext = fourthread.Ext,
                         Type = Utils.GetAttachmentTypeFromExtension(fourthread.Ext),
-                    }
-                };
+                    };
+                }
             }
         }
         return new Catalog()
@@ -173,14 +179,19 @@ public class Client
                 AuthorName = fourComment.Name,
                 AuthorRole = fourComment.Capcode,
                 RawCommentContent = new RawCommentContent(fourComment.Com),
-                Attachment = new Attachment()
+            };
+            if (fourComment.Tim != null)
+            {
+                comments[i].Attachment = new Attachment()
                 {
                     BigUrl = $"https://{Backends.FChan.Domains.UserContent}/{thread.BoardId}/{fourComment.Tim}{fourComment.Ext}",
                     SmallUrl = $"https://{Backends.FChan.Domains.UserContent}/{thread.BoardId}/{fourComment.Tim}s.jpg",
-                    Ext =  fourComment.Ext,
+                    FileName = fourComment.Filename,
+                    FileSize = (long)fourComment.Fsize,
+                    Ext = fourComment.Ext,
                     Type = Utils.GetAttachmentTypeFromExtension(fourComment.Ext),
-                }
-            };
+                };
+            }
         };
         var result = new Thread()
         {

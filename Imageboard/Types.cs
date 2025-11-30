@@ -498,6 +498,16 @@ public class Attachment
     /// URL to the small (preview) version of the attachment.
     /// </summary>
     public required string SmallUrl;
+
+    /// <summary>
+    /// The filename of the attachment.
+    /// </summary>
+    public required string FileName;
+
+    /// <summary>
+    /// The size of the attachment in bytes.
+    /// </summary>
+    public required long FileSize;
     
     /// <summary>
     /// Extension of the attachment.

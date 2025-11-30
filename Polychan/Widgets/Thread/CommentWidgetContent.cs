@@ -1,4 +1,5 @@
-﻿using HtmlAgilityPack;
+﻿using System.Diagnostics;
+using HtmlAgilityPack;
 using MaterialDesign;
 using Polychan.GUI;
 using Polychan.GUI.Layouts;
@@ -56,15 +57,6 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
 
         m_repliesLabel = new Label(this);
 
-        if (comment.Attachment != null)
-        {
-            m_previewInfoLabel = new Label(this)
-            {
-                X = 0,
-                Y = 0,
-            };
-        }
-
         var rawComment = comment.RawCommentContent!;
         var htmlEncoded = rawComment;
         var decoded = WebUtility.HtmlDecode(htmlEncoded);
@@ -101,8 +93,6 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
 
         var commentY = m_nameLabel.Y + m_nameLabel.Height + 4;
 
-        // var thumbnailUrl = $"https://{FChan.Domains.UserContent}/{board}/{post.Tim}{post.Ext}";
-        // var thumbnailExt = ApiComment.Ext;
         if (comment.Attachment != null)
         {
             var thumbnailUrl = comment.Attachment.BigUrl;
@@ -111,6 +101,11 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
             {
                 X = 0,
                 Y = commentY,
+            };
+            m_previewInfoLabel = new Label(this)
+            {
+                X = 0,
+                Y = 0,
             };
         }
 
@@ -130,10 +125,12 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
 
     public void SetBitmapPreview(SKImage thumbnail)
     {
+        Debug.Assert(ApiComment.Attachment != null);
+        
         m_previewBitmap?.SetThumbnail(thumbnail);
         // Bytes and size info label
-        // var previewInfo = $"{ApiComment.Filename}{ApiComment.Ext} ({((long)ApiComment.Fsize!).FormatBytes()}, {thumbnail.Width}x{thumbnail.Height})";
-        // m_previewInfoLabel!.Text = $"<span class=\"date\">{previewInfo}</span>";
+        var previewInfo = $"{ApiComment.Attachment.FileName}{ApiComment.Attachment.Ext} ({ApiComment.Attachment.FileSize.FormatBytes()}, {thumbnail.Width}x{thumbnail.Height})";
+        m_previewInfoLabel!.Text = $"<span class=\"date\">{previewInfo}</span>";
         
         SetHeight();
     }
@@ -211,7 +208,7 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
 
         if (m_previewInfoLabel != null)
         {
-            m_previewInfoLabel.Y = (m_previewBitmap?.Bitmap != null ? (m_previewBitmap.Y + m_previewBitmap.Height + 8) : 0);
+            m_previewInfoLabel.Y = m_previewBitmap!.Y + m_previewBitmap.Height + 8;
         }
 
         m_repliesLabel.X = m_dateLabel.X + m_dateLabel.Width + 2;
@@ -234,8 +231,18 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
                 newHeight = m_previewBitmap.Height + 4;
             }
         }
+        else
+        {
+            newHeight += m_commentLabel.Height + 4;
+        }
+        
+        if (m_previewInfoLabel != null)
+        {
+            newHeight += m_previewInfoLabel.Height;
+            newHeight += 8;
+        }
 
-        this.Height = newHeight + m_nameLabel.Height + ((m_previewInfoLabel?.Height + 8) ?? 0);
+        this.Height = newHeight + m_nameLabel.Height;
     }
 
     #endregion

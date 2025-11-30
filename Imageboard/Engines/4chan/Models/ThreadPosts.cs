@@ -81,7 +81,7 @@ public class Post : JsonResponse
     public string Ext = string.Empty;
 
     [JsonProperty("fsize")]
-    public int? Fsize;
+    public int Fsize;
 
     [JsonProperty("md5")]
     public string Md5 = string.Empty;
