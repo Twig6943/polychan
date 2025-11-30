@@ -1,4 +1,4 @@
-﻿namespace FChan.Models;
+﻿namespace Backends.FChan.Models;
 
 public readonly record struct PostId(long Value)
 {

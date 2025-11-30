@@ -1,17 +1,19 @@
-﻿using Polychan.App.Widgets;
+﻿using System.Diagnostics;
+using Polychan.App.Widgets;
 using Polychan.GUI.Layouts;
 using Polychan.GUI.Widgets;
+using SkiaSharp;
 
 namespace Polychan.App;
 
-public class PostsView : Widget
+public class ThreadView : Widget
 {
-    private readonly Dictionary<FChan.Models.PostId, PostWidget> m_postWidgets = [];
+    private readonly Dictionary<Imageboard.CommentId, CommentWidget> m_postWidgets = [];
     
     private readonly ScrollArea? m_postsListWidget;
     private readonly Label m_threadTitleLabel;
     
-    public PostsView(string board, FChan.Models.ThreadPosts threadPosts, FChan.Models.PostId threadId, Widget? parent = null) : base(parent)
+    public ThreadView(Imageboard.Thread fullThread, Widget? parent = null) : base(parent)
     {
         Name = "Posts View";
         CatchCursorEvents = false;
@@ -20,7 +22,7 @@ public class PostsView : Widget
         Layout = new VBoxLayout();
         
         m_threadTitleLabel = MainWindow.TabInfoWidgetThing(this);
-        m_threadTitleLabel.Text = $"<span class=\"header\">/{board}/{threadId}/ - {threadPosts.Posts[0].Sub}</span>";
+        m_threadTitleLabel.Text = $"<span class=\"header\">/{fullThread.BoardId}/{fullThread.Id}/ - {fullThread.Title}</span>";
 
         m_postsListWidget = new ScrollArea(this)
         {
@@ -41,21 +43,22 @@ public class PostsView : Widget
             Name = "Posts Lists Holder"
         };
         
-        foreach (var post in threadPosts.Posts)
+        Debug.Assert(fullThread.Summary == false);
+        foreach (var comment in fullThread.Comments!)
         {
-            var widget = new PostWidget(this, board, threadPosts, post, m_postsListWidget.ChildWidget)
+            var widget = new CommentWidget(this, comment, m_postsListWidget.ChildWidget)
             {
                 Fitting = new FitPolicy(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed)
             };
-            m_postWidgets.Add(post.No, widget);
+            m_postWidgets.Add(comment.Id, widget);
         }
 
-        LoadPostPreviews(board, m_postWidgets);
+        CommentPostPreviews(m_postWidgets);
     }
     
-    public void LoadPostPreviews(string board, Dictionary<FChan.Models.PostId, PostWidget> widgetsToUpdate)
+    public void CommentPostPreviews(Dictionary<Imageboard.CommentId, CommentWidget> widgetsToUpdate)
     {
-        var refPosts = new Dictionary<FChan.Models.PostId, List<PostWidget>>();
+        var refPosts = new Dictionary<Imageboard.CommentId, List<CommentWidget>>();
 
         foreach (var key in widgetsToUpdate.Keys)
         {
@@ -68,7 +71,7 @@ public class PostsView : Widget
             {
                 if (long.TryParse(refID, out var lid))
                 {
-                    var id = new FChan.Models.PostId(lid);
+                    var id = new Imageboard.CommentId(lid);
                     // if (postWidgets.TryGetValue(id, out var value))
                     if (widgetsToUpdate.ContainsKey(id))
                     {
@@ -91,8 +94,8 @@ public class PostsView : Widget
         }
 
         // Load thumbnails for posts
-        var tuples = widgetsToUpdate.Select(c => (c.Key, c.Value.ApiPost.Tim));
-        _ = ChanApp.Client.LoadThumbnailsAsync(board, tuples, (postId, image) =>
+        var tuples = widgetsToUpdate.Select(c => (c.Key, c.Value.ApiPost.Attachment?.SmallUrl));
+        _ = Utils.HttpHelpers.LoadThumbnailsAsync(tuples, (postId, image) =>
         {
             if (image != null)
             {

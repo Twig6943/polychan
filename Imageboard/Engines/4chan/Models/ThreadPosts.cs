@@ -1,11 +1,11 @@
 ﻿using Newtonsoft.Json;
 
-namespace FChan.Models;
+namespace Backends.FChan.Models;
 
 /// <summary>
 /// A full thread, consisting of the OP and all replies.
 /// </summary>
-public class ThreadPosts : Model
+public class ThreadPosts : JsonResponse
 {
     [JsonIgnore]
     public PostId No => Posts[0].No;
@@ -17,7 +17,7 @@ public class ThreadPosts : Model
 /// <summary>
 /// A single post within a thread, including the OP.
 /// </summary>
-public class Post : Model
+public class Post : JsonResponse
 {
     [JsonProperty("no")]
     public PostId No;

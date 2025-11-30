@@ -1,4 +1,4 @@
-﻿namespace FChan;
+﻿namespace Backends.FChan;
 
 public static class Domains
 {

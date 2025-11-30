@@ -46,15 +46,16 @@ public class HistoryPage : Widget
             Name = "History List Holder"
         };
         
+        /*
         var history = ChanApp.HistoryDb.LoadHistory();
         foreach (var thread in history)
         {
-            /*
             new Label(this)
             {
                 Text = thread.Title ?? "NO TITLE",
             };
             */
+            /*
             var model = JsonConvert.DeserializeObject<FChan.Models.CatalogThread>(thread.Json)!;
             var ticket = new ThreadTicketWidget(model, scroll.ChildWidget)
             {
@@ -70,6 +71,7 @@ public class HistoryPage : Widget
                 ticket.SetBitmapPreview(bitmap);
             }
         }
+        */
     }
 
     public void OnVisible()

@@ -1,11 +1,11 @@
 ﻿using Newtonsoft.Json;
 
-namespace FChan.Models;
+namespace Backends.FChan.Models;
 
 /// <summary>
 /// Represents a page in the 4chan board catalog.
 /// </summary>
-public class CatalogPage : Model
+public class CatalogPage : JsonResponse
 {
     /// <summary>
     /// Page number in the catalog.
@@ -23,7 +23,7 @@ public class CatalogPage : Model
 /// <summary>
 /// Represents a thread or a post in the catalog.
 /// </summary>
-public class CatalogThread : Model
+public class CatalogThread : JsonResponse
 {
     /// <summary>The numeric post ID.</summary>
     [JsonProperty("no")]
@@ -158,7 +158,7 @@ public class CatalogThread : Model
 
     /// <summary>UNIX timestamp of last modification to the thread.</summary>
     [JsonProperty("last_modified")]
-    public int? LastModified { get; set; }
+    public int LastModified { get; set; }
 
     /// <summary>Category tag (used on /f/ board only).</summary>
     [JsonProperty("tag")]

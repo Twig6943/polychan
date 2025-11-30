@@ -1,4 +1,4 @@
-﻿namespace FChan.Responses;
+﻿namespace Backends.FChan.Responses;
 
 public class CatalogResponse
 {

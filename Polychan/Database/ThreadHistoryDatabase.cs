@@ -1,4 +1,5 @@
-﻿using FChan.Models;
+﻿/*
+using FChan.Models;
 using Microsoft.Data.Sqlite;
 
 namespace Polychan.App.Database;
@@ -99,3 +100,4 @@ public class ThreadHistoryDatabase
         return results;
     }
 }
+ */

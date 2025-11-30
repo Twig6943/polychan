@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.Sqlite;
+﻿/*
+using Microsoft.Data.Sqlite;
 
 namespace Polychan.App.Database;
 
@@ -73,3 +74,4 @@ public class DownloadedDatabase
         cmd.ExecuteNonQuery();
     }
 }
+ */

@@ -1,4 +1,5 @@
-﻿using Polychan.GUI;
+﻿using System.Diagnostics;
+using Polychan.GUI;
 using Polychan.GUI.Input;
 using Polychan.GUI.Widgets;
 using SkiaSharp;
@@ -11,8 +12,6 @@ public class ThreadTicketWidget : Widget, IPaintHandler, IPostPaintHandler, IMou
     private const int MAX_IMAGE_WIDTH = 75;
     private static readonly Padding Padding = new(8);
 
-    private readonly FChan.Models.CatalogThread m_thread;
-
     private readonly Image m_previewImage;
     private readonly Label? m_subjectLabel;
     private readonly Label m_commentLabel;
@@ -20,13 +19,13 @@ public class ThreadTicketWidget : Widget, IPaintHandler, IPostPaintHandler, IMou
     private bool m_hovering = false;
     
     public Image PreviewImage => m_previewImage;
-    public FChan.Models.CatalogThread ApiThread => m_thread;
-    
+    public Imageboard.Thread ApiThread { get; }
+
     public Action? OnItemClick { get; set; }
 
-    public ThreadTicketWidget(FChan.Models.CatalogThread thread, Widget? parent = null) : base(parent)
+    public ThreadTicketWidget(Imageboard.Thread thread, Widget? parent = null) : base(parent)
     {
-        m_thread = thread;
+        ApiThread = thread;
         Name = "A thread widget!";
         ShouldCache = true;
 
@@ -38,18 +37,18 @@ public class ThreadTicketWidget : Widget, IPaintHandler, IPostPaintHandler, IMou
             CatchCursorEvents = false
         };
 
-        var rawComment = thread.Com ?? string.Empty;
+        var rawComment = thread.RawCommentContent ?? string.Empty;
         var htmlEncoded = rawComment;
         var decoded = WebUtility.HtmlDecode(htmlEncoded);
 
-        if (!string.IsNullOrEmpty(thread.Sub))
+        if (!string.IsNullOrEmpty(thread.Title))
         {
             m_subjectLabel = new Label(this)
             {
                 X = Padding.Left,
                 Y = Padding.Top,
                 
-                Text = $"<span class=\"name\">{thread.Sub}</span>",
+                Text = $"<span class=\"name\">{thread.Title}</span>",
                 
                 WordWrap = true,
                 CatchCursorEvents = false,
@@ -146,21 +145,28 @@ public class ThreadTicketWidget : Widget, IPaintHandler, IPostPaintHandler, IMou
 
             iconX += (int)(iconWidth + labelWidth + spacing + 8);
         }
-
-        drawIconText(MaterialDesign.MaterialIcons.ModeComment, m_thread.Replies.ToString());
-        drawIconText(MaterialDesign.MaterialIcons.Image, m_thread.Images.ToString());
-        drawIconText(MaterialDesign.MaterialIcons.AccessTime, unixToTimeAgo(m_thread.Time));
+        
+        Debug.Assert(ApiThread.CreatedAt != null);
+        
+        drawIconText(MaterialDesign.MaterialIcons.ModeComment, ApiThread.CommentsCount.ToString());
+        drawIconText(MaterialDesign.MaterialIcons.Image, ApiThread.AttachmentsCount.ToString());
+        drawIconText(MaterialDesign.MaterialIcons.AccessTime, timeAgo((DateTime)ApiThread.CreatedAt));
 
         canvas.Restore();
     }
 
     private string unixToTimeAgo(long unixTime)
     {
-        DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(unixTime);
-        DateTime dateTime = dateTimeOffset.UtcDateTime;
+        var dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(unixTime);
+        var dateTime = dateTimeOffset.UtcDateTime;
 
-        DateTime now = DateTime.UtcNow;
-        TimeSpan diff = now - dateTime;
+        return timeAgo(dateTime);
+    }
+
+    private string timeAgo(DateTime time)
+    {
+        var now = DateTime.UtcNow;
+        var diff = now - time;
 
         if (diff.TotalSeconds < 60)
         {

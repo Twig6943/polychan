@@ -2,21 +2,21 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace FChan.Models;
+namespace Backends;
 
-public class Model
+public class JsonResponse
 {
     [JsonIgnore]
     public string OriginalJson = string.Empty;
 }
 
-public class ModelConverter : JsonConverter
+public class JsonResponseConverter : JsonConverter
 {
     public override bool CanWrite => false;
     
     public override bool CanConvert(Type objectType)
     {
-        return typeof(Model).IsAssignableFrom(objectType);
+        return typeof(JsonResponse).IsAssignableFrom(objectType);
     }
 
     public override object ReadJson(JsonReader reader, Type objectType, object? existingValue, JsonSerializer serializer)
@@ -25,7 +25,7 @@ public class ModelConverter : JsonConverter
         var jo = JObject.Load(reader);
 
         // Deserialize normally
-        var result = Activator.CreateInstance(objectType) as Model;
+        var result = Activator.CreateInstance(objectType) as JsonResponse;
 
         // Populate properties WITHOUT calling this converter again
         var tempSerializer = new JsonSerializer();
@@ -57,7 +57,7 @@ public class ModelConverter : JsonConverter
 
             var value = prop.GetValue(obj);
 
-            if (value is Model nestedModel)
+            if (value is JsonResponse nestedModel)
             {
                 // Already populated OriginalJson from parent JSON
                 // But recalc in case nested property is object within JSON
@@ -67,7 +67,7 @@ public class ModelConverter : JsonConverter
                 // Recurse
                 SetNestedOriginalJson(nestedModel);
             }
-            else if (value is IEnumerable<Model> enumerable)
+            else if (value is IEnumerable<JsonResponse> enumerable)
             {
                 foreach (var item in enumerable)
                 {

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FChan\FChan.csproj" />
+    <ProjectReference Include="..\Imageboard\Imageboard.csproj" />
     <ProjectReference Include="..\Polychan.GUI\Polychan.GUI.csproj" />
     <ProjectReference Include="..\Polychan.Resources\Polychan.Resources.csproj" />
   </ItemGroup>

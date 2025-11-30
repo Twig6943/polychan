@@ -6,7 +6,7 @@ using SkiaSharp;
 
 namespace Polychan.App.Widgets;
 
-public class PostWidget : Widget, IPaintHandler
+public class CommentWidget : Widget, IPaintHandler
 {
     private static readonly Padding Padding = new(8);
 
@@ -15,24 +15,19 @@ public class PostWidget : Widget, IPaintHandler
 
     private int m_treeIndex = 0;
 
-    private readonly PostsView m_view;
-    private readonly PostWidgetContent m_content;
+    private readonly ThreadView m_view;
+    private readonly CommentWidgetContent m_content;
 
     private NullWidget? m_repliesHolder;
     private PushButton? m_showRepliesButton;
 
-    private readonly string m_board;
-    private readonly FChan.Models.ThreadPosts m_thread;
-
-    public FChan.Models.Post ApiPost => m_content.ApiPost;
+    public Imageboard.Comment ApiPost => m_content.ApiComment;
     public List<string> ReferencedPosts => m_content.ReferencedPosts;
-    public PostWidgetContent Content => m_content; // @TEMP
+    public CommentWidgetContent Content => m_content; // @TEMP
     
-    public PostWidget(PostsView view, string board, FChan.Models.ThreadPosts thread, FChan.Models.Post post, Widget? parent = null) : base(parent)
+    public CommentWidget(ThreadView view, Imageboard.Comment comment, Widget? parent = null) : base(parent)
     {
         m_view = view;
-        m_board = board;
-        m_thread = thread;
         
         Name = "PostWidgetContainer";
 
@@ -43,14 +38,14 @@ public class PostWidget : Widget, IPaintHandler
         };
         this.AutoSizing = new(SizePolicy.Policy.Ignore, SizePolicy.Policy.Fit);
 
-        m_content = new PostWidgetContent(board, thread, post, this)
+        m_content = new CommentWidgetContent(comment, this)
         {
             Width = this.Width,
             Fitting = new(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed)
         };
     }
 
-    public void SetReplies(List<PostWidget> replies)
+    public void SetReplies(List<CommentWidget> replies)
     {
         if (replies.Count == 0) return;
 
@@ -96,7 +91,7 @@ public class PostWidget : Widget, IPaintHandler
         };
     }
 
-    private void loadReplies(List<PostWidget> replies)
+    private void loadReplies(List<CommentWidget> replies)
     {
         m_loadedReplies = true;
 
@@ -115,18 +110,18 @@ public class PostWidget : Widget, IPaintHandler
             },
         };
 
-        var pw = new Dictionary<FChan.Models.PostId, PostWidget>(replies.Count);
+        var pw = new Dictionary<Imageboard.CommentId, CommentWidget>(replies.Count);
         foreach (var item in replies)
         {
-            var widget = new PostWidget(m_view, m_board, m_thread, item.m_content.ApiPost, m_repliesHolder)
+            var widget = new CommentWidget(m_view, item.m_content.ApiComment, m_repliesHolder)
             {
                 Width = this.Width,
                 Fitting = new(FitPolicy.Policy.Expanding, FitPolicy.Policy.Fixed),
                 m_treeIndex = this.m_treeIndex + 1 // Alternating row colors for replies? Looks pretty cool ig
             };
-            pw.Add(item.m_content.ApiPost.No, widget);
+            pw.Add(item.m_content.ApiComment.Id, widget);
         }
-        m_view.LoadPostPreviews(m_board, pw);
+        m_view.CommentPostPreviews(pw);
     }
 
     /// <summary>

@@ -1,13 +1,11 @@
 ﻿using Polychan.GUI.Widgets;
 using Polychan.GUI;
 using SkiaSharp;
-using FChan;
-using FChan.Models;
 using Polychan.App.Utils;
 
 namespace Polychan.App.Widgets;
 
-public class PostThumbnail : Image, IPaintHandler, IMouseDownHandler, IMouseEnterHandler, IMouseLeaveHandler
+public class CommentThumbnail : Image, IPaintHandler, IMouseDownHandler, IMouseEnterHandler, IMouseLeaveHandler
 {
     private const int MAX_IMAGE_WIDTH = 1280;
 
@@ -20,10 +18,10 @@ public class PostThumbnail : Image, IPaintHandler, IMouseDownHandler, IMouseEnte
 
     private readonly string m_fullUrl;
     private readonly string m_ext;
-    
+
     private GifPlayer? m_gifPlayer;
 
-    public PostThumbnail(string fullSizedUrl, string ext, PostWidgetContent parent) : base(parent)
+    public CommentThumbnail(string fullSizedUrl, string ext, CommentWidgetContent parent) : base(parent)
     {
         m_fullUrl = fullSizedUrl;
         m_ext = ext;
@@ -60,6 +58,7 @@ public class PostThumbnail : Image, IPaintHandler, IMouseDownHandler, IMouseEnte
         {
             m_gifPlayer?.Start();
         }
+
         m_usingThumbnail = !m_usingThumbnail;
         updateImage((m_usingThumbnail) ? m_thumbnailImage : m_fullImage);
 
@@ -107,11 +106,12 @@ public class PostThumbnail : Image, IPaintHandler, IMouseDownHandler, IMouseEnte
             maxWidth = newWidth;
         }
 
-        if (newWidth > maxWidth || newWidth > PostThumbnail.MAX_IMAGE_WIDTH)
+        if (newWidth > maxWidth || newWidth > CommentThumbnail.MAX_IMAGE_WIDTH)
         {
             newWidth = maxWidth;
             newHeight = (int)(((float)newWidth / Bitmap.Width) * Bitmap.Height);
         }
+
         Resize(newWidth, newHeight);
     }
 
@@ -129,7 +129,7 @@ public class PostThumbnail : Image, IPaintHandler, IMouseDownHandler, IMouseEnte
 
         FitToMaxWidth(m_fullImage?.Width ?? MAX_IMAGE_WIDTH);
 
-        (Parent as PostWidgetContent)?.OnResize();
+        (Parent as CommentWidgetContent)?.OnResize();
     }
 
     private void loadFull()
@@ -139,12 +139,10 @@ public class PostThumbnail : Image, IPaintHandler, IMouseDownHandler, IMouseEnte
 
         if (m_ext == ".gif")
         {
-            m_gifPlayer = new();
+            m_gifPlayer = new GifPlayer();
 
-            var url = m_fullUrl;
-
-            Console.WriteLine(url);
-            _ = m_gifPlayer.LoadAsync(url, () =>
+            Console.WriteLine(m_fullUrl);
+            _ = m_gifPlayer.LoadAsync(m_fullUrl, () =>
             {
                 m_loadedFull = true;
                 m_usingThumbnail = !m_usingThumbnail;
@@ -161,8 +159,7 @@ public class PostThumbnail : Image, IPaintHandler, IMouseDownHandler, IMouseEnte
         }
         else
         {
-            
-            _ = ChanApp.Client.DownloadAttachmentFromURLAsync(m_fullUrl, (thumbnail) =>
+            _ = DownloadAttachmentFromURLAsync(m_fullUrl, (thumbnail) =>
             {
                 if (thumbnail != null)
                 {
@@ -174,6 +171,22 @@ public class PostThumbnail : Image, IPaintHandler, IMouseDownHandler, IMouseEnte
                     m_loadedFull = true;
                 }
             });
+        }
+    }
+    
+    public async Task DownloadAttachmentFromURLAsync(string url, Action<SKImage?> onComplete)
+    {
+        try
+        {
+            byte[] imageBytes = await ChanApp.ImageboardClient.HttpClient.GetByteArrayAsync(url);
+            using var ms = new MemoryStream(imageBytes);
+            var ret = SKImage.FromEncodedData(ms); // Decode into SKBitmap
+            onComplete.Invoke(ret);
+        }
+        catch
+        {
+            onComplete?.Invoke(null);
+            // return null; // Handle gracefully if image isn't available
         }
     }
 

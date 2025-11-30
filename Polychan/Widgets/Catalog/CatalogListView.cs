@@ -6,20 +6,18 @@ namespace Polychan.App.Widgets;
 
 public class CatalogListView : Widget
 {
-    public string? CurrentBoard { get; private set; }
-    
-    public IReadOnlyDictionary<FChan.Models.PostId, ThreadTicketWidget> Threads => m_threadWidgets;
+    public IReadOnlyDictionary<Imageboard.ThreadId, ThreadTicketWidget> Threads => m_threadWidgets;
     public Action<ThreadTicketWidget>? OnItemClick { get; set; }
     
-    private readonly FChan.Responses.CatalogResponse m_catalogResponse;
-    private readonly Dictionary<FChan.Models.PostId, ThreadTicketWidget> m_threadWidgets = [];
+    private readonly Imageboard.Catalog m_catalogResponse;
+    private readonly Dictionary<Imageboard.ThreadId, ThreadTicketWidget> m_threadWidgets = [];
     
     private readonly ScrollArea m_scrollArea;
     private readonly Label m_boardTitleLabel;
     
-    public CatalogListView(FChan.Responses.CatalogResponse catalogResponse, Widget? parent = null) : base(parent)
+    public CatalogListView(Imageboard.Catalog catalog, Widget? parent = null) : base(parent)
     {
-        m_catalogResponse = catalogResponse;
+        m_catalogResponse = catalog;
         
         /*
         var threadsListHolder = new NullWidget(mainHolder)
@@ -56,17 +54,15 @@ public class CatalogListView : Widget
             },
             Name = "Threads List Holder"
         };
-    }
-
-    public void LoadCatalog(string board)
-    {
-        this.CurrentBoard = board;
         
+        // ---------------------------------------------------------------------------------
+        // Load catalog widgets
+        // ---------------------------------------------------------------------------------
         m_threadWidgets.Clear();
 
-        // m_boardTitleLabel.Text = $"<span class=\"header\">/{board}/ - {ChanApp.Client.Boards.Boards.Find(c => c.URL == board).Title}</span>";
+        m_boardTitleLabel.Text = $"<span class=\"header\">/{catalog.Board.Id}/ - {catalog.Board.Title}</span>";
 
-        void LoadPage(FChan.Models.CatalogPage page)
+        void LoadPage(Imageboard.Catalog.Page page)
         {
             foreach (var thread in page.Threads)
             {
@@ -79,7 +75,7 @@ public class CatalogListView : Widget
                 {
                     OnItemClick?.Invoke(widget);
                 };
-                m_threadWidgets.Add(thread.No, widget);
+                m_threadWidgets.Add(thread.Id, widget);
             }
         }
 
@@ -93,16 +89,14 @@ public class CatalogListView : Widget
     
     public void T()
     {
-        Debug.Assert(CurrentBoard != null);
-        
         // @NOTE
         // I'm too tired to figure this out right now, but thread widgets won't look right if thumbnails are loaded "immediately"
         // AGH idk....
         // -pelly
 
         // Load thumbnails for threads
-        var tuples = m_threadWidgets.Select(c => (c.Key, c.Value.ApiThread.Tim));
-        _ = ChanApp.Client.LoadThumbnailsAsync(CurrentBoard, tuples, (postId, image) =>
+        var tuples = m_threadWidgets.Select(c => (c.Key, c.Value.ApiThread.Attachment?.SmallUrl));
+        _ = Utils.HttpHelpers.LoadThumbnailsAsync(tuples, (postId, image) =>
         {
             if (image != null)
             {

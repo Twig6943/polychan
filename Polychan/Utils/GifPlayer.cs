@@ -5,7 +5,7 @@ namespace Polychan.App.Utils;
 
 public class GifPlayer : IDisposable
 {
-    private List<FourChanClient.GifFrame> m_frames = [];
+    private List<HttpHelpers.GifFrame> m_frames = [];
     private int m_currentFrame = 0;
     private double m_nextFrameTime = 0;
     private readonly Stopwatch m_stopwatch = new();
@@ -15,7 +15,7 @@ public class GifPlayer : IDisposable
 
     public async Task LoadAsync(string url, Action onComplete)
     {
-        m_frames = await ChanApp.Client.LoadGifFromUrlAsync(url);
+        m_frames = await Utils.HttpHelpers.LoadGifFromUrlAsync(url);
 
         if (m_frames.Count > 0)
         {

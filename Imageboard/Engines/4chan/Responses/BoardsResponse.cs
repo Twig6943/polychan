@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
-using FChan.Models;
+using Backends.FChan.Models;
 
-namespace FChan.Responses;
+namespace Backends.FChan.Responses;
 
 public struct BoardsResponse
 {

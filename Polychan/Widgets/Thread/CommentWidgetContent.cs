@@ -9,9 +9,9 @@ using System.Net;
 
 namespace Polychan.App.Widgets;
 
-public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
+public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
 {
-    private readonly PostThumbnail m_previewBitmap;
+    private readonly CommentThumbnail? m_previewBitmap;
     private readonly Label m_nameLabel;
     private readonly Label m_dateLabel;
     private readonly Label? m_previewInfoLabel;
@@ -19,27 +19,22 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
     private readonly Label m_commentLabel;
     private readonly Label m_repliesLabel;
 
-    private readonly string m_board;
-    private readonly FChan.Models.ThreadPosts m_thread;
-
-    public FChan.Models.Post ApiPost { get; }
+    public Imageboard.Comment ApiComment { get; }
     public readonly List<string> ReferencedPosts = [];
 
-    public PostWidgetContent(string board, FChan.Models.ThreadPosts thread, FChan.Models.Post post, Widget? parent = null) : base(parent)
+    public CommentWidgetContent(Imageboard.Comment comment, Widget? parent = null) : base(parent)
     {
         Name = "A Post widget!!!";
         ShouldCache = true;
 
-        ApiPost = post;
-        m_board = board;
-        m_thread = thread;
+        ApiComment = comment;
         
         // UI Layout
         m_nameLabel = new Label(this)
         {
             X = 0,
             Y = 0,
-            Text = $"<span class=\"name\">{post.Name}</span>",
+            Text = $"<span class=\"name\">{comment.AuthorName}</span>",
             CatchCursorEvents = false,
         };
 
@@ -47,7 +42,7 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
         {
             X = 0,
             Y = 0,
-            Text = $"<span class=\"date\">{post.Now}</span>",
+            Text = $"<span class=\"date\">{comment.CreatedAt}</span>",
             CatchCursorEvents = false,
         };
 
@@ -55,13 +50,13 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
         {
             X = 0,
             Y = 0,
-            Text = $"<span class=\"postID\">#{post.No}</span>",
+            Text = $"<span class=\"postID\">#{comment.Id}</span>",
             CatchCursorEvents = false,
         };
 
         m_repliesLabel = new Label(this);
 
-        if (post.Tim != null)
+        if (comment.Attachment != null)
         {
             m_previewInfoLabel = new Label(this)
             {
@@ -70,7 +65,7 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
             };
         }
 
-        var rawComment = post.Com;
+        var rawComment = comment.RawCommentContent!;
         var htmlEncoded = rawComment;
         var decoded = WebUtility.HtmlDecode(htmlEncoded);
         var commentInput = decoded;
@@ -89,7 +84,8 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
                         {
                             case "quotelink":
                                 ReferencedPosts.Add(node.InnerHtml.TrimStart('>'));
-                                if (node.InnerText == $">>{m_thread.No}")
+                                // @HACK @TODO - this isn't necessarily true and needs to be an API bool instead.
+                                if (node.InnerText == $">>{ApiComment.ThreadId}")
                                 {
                                     node.InnerHtml = $"{node.InnerHtml} (OP)";
                                 }
@@ -105,13 +101,18 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
 
         var commentY = m_nameLabel.Y + m_nameLabel.Height + 4;
 
-        var thumbnailUrl = $"https://{FChan.Domains.UserContent}/{board}/{post.Tim}{post.Ext}";
-        var thumbnailExt = ApiPost.Ext;
-        m_previewBitmap = new PostThumbnail(thumbnailUrl, thumbnailExt, this)
+        // var thumbnailUrl = $"https://{FChan.Domains.UserContent}/{board}/{post.Tim}{post.Ext}";
+        // var thumbnailExt = ApiComment.Ext;
+        if (comment.Attachment != null)
         {
-            X = 0,
-            Y = commentY,
-        };
+            var thumbnailUrl = comment.Attachment.BigUrl;
+            var thumbnailExt = comment.Attachment.Ext;
+            m_previewBitmap = new CommentThumbnail(thumbnailUrl, thumbnailExt, this)
+            {
+                X = 0,
+                Y = commentY,
+            };
+        }
 
         m_commentLabel = new Label(this)
         {
@@ -129,11 +130,11 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
 
     public void SetBitmapPreview(SKImage thumbnail)
     {
-        m_previewBitmap.SetThumbnail(thumbnail);
+        m_previewBitmap?.SetThumbnail(thumbnail);
         // Bytes and size info label
-        var previewInfo = $"{ApiPost.Filename}{ApiPost.Ext} ({((long)ApiPost.Fsize!).FormatBytes()}, {thumbnail.Width}x{thumbnail.Height})";
-        m_previewInfoLabel!.Text = $"<span class=\"date\">{previewInfo}</span>";
-
+        // var previewInfo = $"{ApiComment.Filename}{ApiComment.Ext} ({((long)ApiComment.Fsize!).FormatBytes()}, {thumbnail.Width}x{thumbnail.Height})";
+        // m_previewInfoLabel!.Text = $"<span class=\"date\">{previewInfo}</span>";
+        
         SetHeight();
     }
 
@@ -147,8 +148,8 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
     {
         if (evt.button == GUI.Input.MouseButton.Right)
         {
-            var threadUrl = $"https://boards.4chan.org/{m_board}/thread/{m_thread.No}";
-            var postUrl = $"{threadUrl}#p{ApiPost.No}";
+            var threadUrl = $"https://boards.4chan.org/{ApiComment.BoardId}/thread/{ApiComment.ThreadId}";
+            var postUrl = $"{threadUrl}#p{ApiComment.Id}";
 
             MenuPopup a = new(this);
             var m = new Menu(this);
@@ -177,7 +178,6 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
             a.Show();
         }
 
-
         return true;
     }
 
@@ -194,7 +194,7 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
     {
         // Fit thumbnail
         var spaceForText = 200;
-        m_previewBitmap.FitToMaxWidth(this.Width - spaceForText);
+        m_previewBitmap?.FitToMaxWidth(this.Width - spaceForText);
 
         SetPositions();
         SetHeight();
@@ -202,7 +202,7 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
 
     internal void SetPositions()
     {
-        m_commentLabel.X = (m_previewBitmap.Bitmap != null ? (m_previewBitmap.Width + 8) : 0);
+        m_commentLabel.X = (m_previewBitmap?.Bitmap != null ? (m_previewBitmap.Width + 8) : 0);
 
         // m_dateLabel.X = Width - m_dateLabel.Width - Padding.Right;
         m_dateLabel.X = m_nameLabel.X + m_nameLabel.Width + 2;
@@ -211,7 +211,7 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
 
         if (m_previewInfoLabel != null)
         {
-            m_previewInfoLabel.Y = (m_previewBitmap.Bitmap != null ? (m_previewBitmap.Y + m_previewBitmap.Height + 8) : 0);
+            m_previewInfoLabel.Y = (m_previewBitmap?.Bitmap != null ? (m_previewBitmap.Y + m_previewBitmap.Height + 8) : 0);
         }
 
         m_repliesLabel.X = m_dateLabel.X + m_dateLabel.Width + 2;
@@ -223,13 +223,16 @@ public class PostWidgetContent : Widget, IPaintHandler, IMouseClickHandler
         m_commentLabel.Height = m_commentLabel.MeasureHeightFromWidth(m_commentLabel.Width);
 
         int newHeight = 0;
-        if (m_commentLabel.Height > m_previewBitmap.Height)
+        if (m_previewBitmap != null)
         {
-            newHeight += m_commentLabel.Height + 4;
-        }
-        else
-        {
-            newHeight = m_previewBitmap.Height + 4;
+            if (m_commentLabel.Height > m_previewBitmap.Height)
+            {
+                newHeight += m_commentLabel.Height + 4;
+            }
+            else
+            {
+                newHeight = m_previewBitmap.Height + 4;
+            }
         }
 
         this.Height = newHeight + m_nameLabel.Height + ((m_previewInfoLabel?.Height + 8) ?? 0);

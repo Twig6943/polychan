@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using MaterialDesign;
+﻿using MaterialDesign;
 using Polychan.GUI;
 using Polychan.GUI.Layouts;
 using Polychan.GUI.Widgets;
@@ -18,31 +17,34 @@ public class MainWindow : NormalWindow
         Search
     }
 
-    class Tab : NullWidget
+    class CatalogTab : NullWidget
     {
-        private readonly string m_board;
         private readonly CatalogListView m_catalogListView;
         private readonly TabsController m_postTabs;
         
-        private FChan.Models.ThreadPosts? m_threadPosts;
+        private Imageboard.Catalog m_catalog;
+        private Imageboard.Thread? m_currentThread;
 
-        public Tab(string board, Widget parent) : base(parent)
+        public CatalogTab(Imageboard.Catalog catalog, Widget parent) : base(parent)
         {
             Layout = new HBoxLayout();
             
-            var catalogApiResponse = ChanApp.Client.GetCatalogAsync(board).GetAwaiter().GetResult();
-            
-            m_board = board;
-            m_catalogListView = new CatalogListView(catalogApiResponse, this)
+            m_catalog = catalog;
+            m_catalogListView = new CatalogListView(catalog, this)
             {
                 Fitting = new FitPolicy(FitPolicy.Policy.Fixed, FitPolicy.Policy.Expanding)
             };
+
+            new VLine(this)
+            {
+                Fitting = new FitPolicy(FitPolicy.Policy.Fixed, FitPolicy.Policy.Expanding)
+            };
+            
             m_postTabs = new TabsController(this)
             {
                 Fitting = FitPolicy.ExpandingPolicy
             };
             
-            m_catalogListView.LoadCatalog(board);
             m_catalogListView.T();
 
             m_catalogListView.OnItemClick = loadThread;
@@ -50,21 +52,22 @@ public class MainWindow : NormalWindow
 
         private void loadThread(ThreadTicketWidget ticket)
         {
-            Debug.Assert(m_catalogListView.CurrentBoard != null);
-            var threadId = ticket.ApiThread.No;
+            var threadId = ticket.ApiThread.Id;
                 
-            m_threadPosts = ChanApp.Client.GetThreadPostsAsync(m_board, threadId).GetAwaiter().GetResult();
+            m_currentThread = ChanApp.ImageboardClient.GetFullThreadAsync(ticket.ApiThread).GetAwaiter().GetResult();
                 
-            var view = new PostsView(m_board, m_threadPosts, threadId, m_postTabs);
+            var view = new ThreadView(m_currentThread, m_postTabs);
             m_postTabs.AddTab(view, $"{threadId}");
 
+            /*
             ChanApp.HistoryDb.SaveVisit(threadId, m_catalogListView.CurrentBoard,
                 ticket.ApiThread.OriginalJson, m_catalogListView.Threads[threadId].PreviewImage.Bitmap.EncodedData.ToArray());
+                */
         }
     }
 
     private readonly Dictionary<SideBarOptions, Widget> m_pages = [];
-    private readonly List<Tab> m_tabs = [];
+    private readonly List<CatalogTab> m_tabs = [];
 
     public MainWindow()
     {
@@ -309,26 +312,15 @@ public class MainWindow : NormalWindow
         return w;
     }
 
-    public void NewTab(string board)
+    public void NewCatalogTab(Imageboard.Catalog catalog)
     {
         var tabParent = m_pages[SideBarOptions.BoardTabs];
-        var tab = new Tab(board, tabParent)
+        var tab = new CatalogTab(catalog, tabParent)
         {
             Fitting = FitPolicy.ExpandingPolicy,
         };
         
         m_tabs.Add(tab);
-    }
-    
-    public void LoadThreadPosts(FChan.Models.ThreadPosts threadPosts, FChan.Models.CatalogThread catalogThread, FChan.Models.PostId threadId)
-    {
-        /*
-        var view = new PostsView(threadId, m_postTabs);
-        m_postTabs.AddTab(view, $"{threadId}");
-
-        ChanApp.HistoryDb.SaveVisit(threadId, ChanApp.Client.CurrentBoard,
-            catalogThread.OriginalJson, m_catalogListView.Threads[threadId].PreviewImage.Bitmap.EncodedData.ToArray());
-            */
     }
 
     public void LoadPage_Board()
