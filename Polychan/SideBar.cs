@@ -19,6 +19,11 @@ public class SideBar : Widget, IPaintHandler
             Spacing = 2
         };
 
+        new ShapedFrame(this)
+        {
+            Fitting = new FitPolicy(FitPolicy.Policy.Expanding, FitPolicy.Policy.Expanding)
+        };
+
         void selectable(string text, Action? onClick)
         {
             var pushButton = new PushButton(text, this)

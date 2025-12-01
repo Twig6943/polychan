@@ -103,7 +103,47 @@ public class ThreadTicketWidget : Widget, IPaintHandler, IPostPaintHandler, IMou
 
         using var paint = new SKPaint();
 
-        var metaRect = new SKRectI(0, 0, 200, (int)Application.DefaultFont.Size + (textPadding.Top + textPadding.Bottom));
+        // Kinda like a proto immediate mode UI?
+        // @TODO - I think I should expand this into its own system so we can do immediate drawing more easily in the program.
+        // Especially for widgets that don't need interaction but still need layouts.
+        var icons = new List<(float ix, float iy, float lx, float ly, string icon, string? label)>();
+        var iconX = 0;
+        void drawIconText(string icon, string? label = null)
+        {
+            var iconWidth = Application.FontIcon.MeasureText(icon);
+            var labelWidth = label != null ? Application.DefaultFont.MeasureText(label) : 0;
+            var spacing = 4;
+            
+            icons.Add(new (
+                // icon pos
+                iconX, Application.FontIcon.Size - 2,
+                // label pos
+                iconX + iconWidth + spacing, Application.DefaultFont.Size - 1,
+                icon, label));
+
+            iconX += (int)iconWidth;
+            if (label != null)
+            {
+                iconX += (int)(labelWidth + spacing);
+                iconX += 10;
+            }
+            else
+            {
+                iconX += 4;
+            }
+        }
+        
+        Debug.Assert(ApiThread.CreatedAt != null);
+        
+        if (ApiThread.Pinned)
+            drawIconText(MaterialDesign.MaterialIcons.PushPin);
+        if (ApiThread.Locked)
+            drawIconText(MaterialDesign.MaterialIcons.Lock);
+        drawIconText(MaterialDesign.MaterialIcons.AccessTime, timeAgo((DateTime)ApiThread.CreatedAt));
+        drawIconText(MaterialDesign.MaterialIcons.ModeComment, ApiThread.CommentsCount.ToString());
+        drawIconText(MaterialDesign.MaterialIcons.Image, ApiThread.AttachmentsCount.ToString());
+
+        var metaRect = new SKRectI(0, 0, iconX + 8 + 4, (int)Application.DefaultFont.Size + (textPadding.Top + textPadding.Bottom));
         metaRect.Left = Width - metaRect.Width;
         metaRect.Right = Width + 1;
         metaRect = metaRect.SetY(Height - metaRect.Height);
@@ -133,24 +173,28 @@ public class ThreadTicketWidget : Widget, IPaintHandler, IPostPaintHandler, IMou
         paint.IsStroke = false;
         paint.Color = Palette.Get(ColorRole.Text);
 
+        /*
         var iconX = 0;
-        void drawIconText(string icon, string label)
+        void drawIconText(string icon, string? label = null)
         {
             var iconWidth = Application.FontIcon.MeasureText(icon);
-            var labelWidth = Application.DefaultFont.MeasureText(label);
+            var labelWidth = label != null ? Application.DefaultFont.MeasureText(label) : 0;
             var spacing = 4;
 
             canvas.DrawText(icon, new SKPoint(iconX, Application.FontIcon.Size - 2), Application.FontIcon, paint);
-            canvas.DrawText(label, new SKPoint(iconX + iconWidth + spacing, Application.DefaultFont.Size - 1), Application.DefaultFont, paint);
+            if (label != null)
+                canvas.DrawText(label, new SKPoint(iconX + iconWidth + spacing, Application.DefaultFont.Size - 1), Application.DefaultFont, paint);
 
             iconX += (int)(iconWidth + labelWidth + spacing + 8);
         }
-        
-        Debug.Assert(ApiThread.CreatedAt != null);
-        
-        drawIconText(MaterialDesign.MaterialIcons.ModeComment, ApiThread.CommentsCount.ToString());
-        drawIconText(MaterialDesign.MaterialIcons.Image, ApiThread.AttachmentsCount.ToString());
-        drawIconText(MaterialDesign.MaterialIcons.AccessTime, timeAgo((DateTime)ApiThread.CreatedAt));
+        */
+
+        foreach (var icon in icons)
+        {
+            canvas.DrawText(icon.icon, new SKPoint(icon.ix, icon.iy), Application.FontIcon, paint);
+            if (icon.label != null)
+                canvas.DrawText(icon.label, new SKPoint(icon.lx, icon.ly), Application.DefaultFont, paint);
+        }
 
         canvas.Restore();
     }
