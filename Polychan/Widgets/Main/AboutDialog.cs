@@ -131,7 +131,7 @@ public class AboutDialog : DialogWindow, IPaintHandler
     {
         m_fntBig = Application.CreateUIFont(SKFontStyleWeight.Normal, 2);
 
-        using var bannerStream = PolychanResources.ResourceAssembly.GetManifestResourceStream("Polychan.Resources.Images.banner.png");
+        using var bannerStream = PolychanResources.ResourceAssembly.GetManifestResourceStream("Polychan.Resources.Images.Client.banner.png");
         var img = SKImage.FromEncodedData(bannerStream);
 
         Layout = new HBoxLayout()

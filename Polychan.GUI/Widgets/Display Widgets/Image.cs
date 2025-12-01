@@ -5,7 +5,7 @@ namespace Polychan.GUI.Widgets;
 public class Image : Widget, IPaintHandler
 {
     // @NOTE
-    // There should be a flag to set if the widget owns the actual bitmap or not so it can dispose of it properly....
+    // There should be a flag to set if the widget owns the actual bitmap or not so it can dispose of properly....
     public SKImage? Bitmap { get; set; }
 
     public bool PreserveAspectRatio { get; set; } = true;

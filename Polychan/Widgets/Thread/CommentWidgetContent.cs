@@ -7,18 +7,21 @@ using Polychan.GUI.Widgets;
 using Polychan.App.Utils;
 using SkiaSharp;
 using System.Net;
+using Polychan.Resources;
 
 namespace Polychan.App.Widgets;
 
 public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
 {
     private readonly CommentThumbnail? m_previewBitmap;
+    private readonly NullWidget m_nameBlock;
     private readonly Label m_nameLabel;
     private readonly Label m_dateLabel;
     private readonly Label? m_previewInfoLabel;
     private readonly Label m_postIdLabel;
     private readonly Label m_commentLabel;
     private readonly Label m_repliesLabel;
+    private readonly Image? m_capcodeImg;
 
     public Imageboard.Comment ApiComment { get; }
     public readonly List<string> ReferencedPosts = [];
@@ -29,9 +32,21 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
         ShouldCache = true;
 
         ApiComment = comment;
-        
+
         // UI Layout
-        m_nameLabel = new Label(this)
+        // @TODO - layouts on their own, so we don't need nullwidgets in order to layout things?
+        // Maybe...
+        m_nameBlock = new NullWidget(this)
+        {
+            X = 0,
+            Y = 0,
+            Layout = new HBoxLayout()
+            {
+                Spacing = 2
+            },
+            AutoSizing = new SizePolicy(SizePolicy.Policy.Fit, SizePolicy.Policy.Fit),
+        };
+        m_nameLabel = new Label(m_nameBlock)
         {
             X = 0,
             Y = 0,
@@ -39,7 +54,53 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
             CatchCursorEvents = false,
         };
 
-        m_dateLabel = new Label(this)
+        if (comment.AuthorRole != null)
+        {
+            var iconName = string.Empty;
+
+            switch (comment.AuthorRole)
+            {
+                case "mod":
+                    iconName = "modicon.png";
+                    break;
+                case "admin":
+                    iconName = "adminicon.png";
+                    break;
+                case "admin_highlight":
+                    iconName = "adminicon.png";
+                    break;
+                case "developer":
+                    iconName = "developericon.png";
+                    break;
+                case "manager":
+                    iconName = "managericon.png";
+                    break;
+                default:
+                    Console.WriteLine($"Unknown role type: {comment.AuthorRole}");
+                    break;
+            }
+
+            // We found an icon!
+            if (!string.IsNullOrEmpty(iconName))
+            {
+                m_nameLabel.Text += ($"## {comment.AuthorRole}");
+                
+                using var iconStream =
+                    PolychanResources.ResourceAssembly.GetManifestResourceStream(
+                        $"Polychan.Resources.Images._4chan.{iconName}");
+                var img = SKImage.FromEncodedData(iconStream);
+                m_capcodeImg = new Image(m_nameBlock)
+                {
+                    X = 0,
+                    Y = 0,
+                    Bitmap = img,
+                    Width = img.Width,
+                    Height = img.Height
+                };
+            }
+        }
+
+        m_dateLabel = new Label(m_nameBlock)
         {
             X = 0,
             Y = 0,
@@ -81,8 +142,10 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
                                 {
                                     node.InnerHtml = $"{node.InnerHtml} (OP)";
                                 }
+
                                 break;
                         }
+
                         break;
                 }
             }
@@ -126,12 +189,13 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
     public void SetBitmapPreview(SKImage thumbnail)
     {
         Debug.Assert(ApiComment.Attachment != null);
-        
+
         m_previewBitmap?.SetThumbnail(thumbnail);
         // Bytes and size info label
-        var previewInfo = $"{ApiComment.Attachment.FileName}{ApiComment.Attachment.Ext} ({ApiComment.Attachment.FileSize.FormatBytes()}, {thumbnail.Width}x{thumbnail.Height})";
+        var previewInfo =
+            $"{ApiComment.Attachment.FileName}{ApiComment.Attachment.Ext} ({ApiComment.Attachment.FileSize.FormatBytes()}, {thumbnail.Width}x{thumbnail.Height})";
         m_previewInfoLabel!.Text = $"<span class=\"date\">{previewInfo}</span>";
-        
+
         SetHeight();
     }
 
@@ -151,18 +215,16 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
             MenuPopup a = new(this);
             var m = new Menu(this);
 
-            m.AddAction(MaterialIcons.Link, "Copy Post URL to Clipboard", () =>
-            {
-                Application.Clipboard.SetText(postUrl);
-            });
-            m.AddAction(MaterialIcons.Public, "Open Post in Browser", () =>
-            {
-                Application.OpenURL(postUrl);
-            });
-            m.AddAction(MaterialIcons.Feed, "Open Thread in Browser", () =>
-            {
-                Application.OpenURL(threadUrl);
-            });
+            m.AddAction(MaterialIcons.Public, "Open Post in Browser", () => { Application.OpenURL(postUrl); });
+            m.AddAction(MaterialIcons.Feed, "Open Thread in Browser", () => { Application.OpenURL(threadUrl); });
+
+            m.AddSeparator();
+
+            m.AddAction(MaterialIcons.Link, "Copy Post URL to Clipboard",
+                () => { Application.Clipboard.SetText(postUrl); });
+
+            m.AddAction(MaterialIcons.Link, "Copy Thread URL to Clipboard",
+                () => { Application.Clipboard.SetText(threadUrl); });
 
             m.AddSeparator();
             m.AddAction(MaterialIcons.Reply, "Reply", null);
@@ -202,7 +264,7 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
         m_commentLabel.X = (m_previewBitmap?.Bitmap != null ? (m_previewBitmap.Width + 8) : 0);
 
         // m_dateLabel.X = Width - m_dateLabel.Width - Padding.Right;
-        m_dateLabel.X = m_nameLabel.X + m_nameLabel.Width + 2;
+        // m_dateLabel.X = m_nameBlock.X + m_nameBlock.Width + 2;
         // m_postIDLabel.X = m_dateLabel.X + m_dateLabel.Width + 2;
         m_postIdLabel.X = this.Width - m_postIdLabel.Width;
 
@@ -235,7 +297,7 @@ public class CommentWidgetContent : Widget, IPaintHandler, IMouseClickHandler
         {
             newHeight += m_commentLabel.Height + 4;
         }
-        
+
         if (m_previewInfoLabel != null)
         {
             newHeight += m_previewInfoLabel.Height;

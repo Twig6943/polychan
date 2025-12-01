@@ -27,6 +27,11 @@ public static class ChanApp
         
         // HistoryDb.Initialize();
         // DownloadedDb.Initialize();
+        
+        foreach (var name in PolychanResources.ResourceAssembly.GetManifestResourceNames())
+        {
+            Console.WriteLine(name);
+        }
     }
 
     public static void Start()
@@ -41,10 +46,12 @@ public static class ChanApp
         MainWindow.Resize(1600, 900);
 
         // Main Window Icon
+        /*
         using var iconStream =
-            PolychanResources.ResourceAssembly.GetManifestResourceStream("Polychan.Resources.Images.4channy.ico");
+            PolychanResources.ResourceAssembly.GetManifestResourceStream("Polychan.Resources.Images.Client.4channy.ico");
         MainWindow.SetIconFromStream(iconStream!);
-
+*/
+        
         var test = ImageboardClient.FourChanBoards[new("g")];
         var catalog = ImageboardClient.GetCatalogAsync(test).GetAwaiter().GetResult();
         MainWindow.NewCatalogTab(catalog);

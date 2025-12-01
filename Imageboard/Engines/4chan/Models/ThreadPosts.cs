@@ -47,16 +47,16 @@ public class Post : JsonResponse
     public string Id = string.Empty;
 
     [JsonProperty("capcode")]
-    public string Capcode = string.Empty;
+    public string? Capcode;
 
     [JsonProperty("country")]
-    public string Country = string.Empty;
+    public string? Country;
 
     [JsonProperty("country_name")]
-    public string CountryName = string.Empty;
+    public string? CountryName;
 
     [JsonProperty("board_flag")]
-    public string BoardFlag = string.Empty;
+    public string? BoardFlag;
 
     [JsonProperty("flag_name")]
     public string FlagName = string.Empty;
